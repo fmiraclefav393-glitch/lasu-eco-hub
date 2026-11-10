@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>300L Economics Class Hub</title>
+<style>
+:root{--bg:#f6f7f4;--card:#fff;--tx:#17211b;--mu:#66726b;--ac:#0f6b3f;--bd:#dde3dd;--ok:#0f6b3f;--no:#b3261e;--mv:#9a6700;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#111713;--card:#1a221d;--tx:#eaf0eb;--mu:#9aa89f;--ac:#4cc489;--bd:#2c382f;--ok:#4cc489;--no:#ff8a80;--mv:#e0b34a;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:4px 0}
+.sub{color:var(--mu);font-size:14px;margin:0 0 12px}
+nav{display:flex;gap:6px;margin:12px 0}
+nav button{flex:1;padding:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;font-weight:600}
+nav button.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:10px 0}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.b{font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.h{color:var(--ok)}.c{color:var(--no)}.m{color:var(--mv)}.n{color:var(--mu)}
+input,select,.btn{width:100%;padding:11px;margin:5px 0;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+.btn{background:var(--ac);color:var(--bg);font-weight:700;border:0;cursor:pointer}
+.btn.s{background:transparent;color:var(--ac);border:1px solid var(--ac)}
+.code{font-size:34px;font-weight:800;letter-spacing:6px;text-align:center;color:var(--ac)}
+.msg{font-size:14px;margin:6px 0;min-height:18px}
+.warn{background:var(--card);border:1px solid var(--mv);color:var(--mv);padding:10px;border-radius:10px;font-size:14px}
+small{color:var(--mu)}
+[hidden]{display:none!important}
+</style></head><body><main>
+<h1>300L Economics Class Hub</h1>
+<p class="sub">LASU Ojo · Class status and attendance</p>
+<div id="warn" class="warn" hidden></div>
+<nav><button data-t="st" class="on">Today</button><button data-t="at">Attendance</button><button data-t="po">Poster</button></nav>
+<section id="st"></section>
+<section id="at" hidden>
+<div class="card"><b>Sign attendance</b>
+<select id="ac"></select>
+<input id="an" placeholder="Full name" autocomplete="name">
+<input id="am" placeholder="Matric number" autocapitalize="characters">
+<input id="ak" placeholder="Class code from lecturer" inputmode="numeric" maxlength="4">
+<button class="btn" id="as">Mark me present</button>
+<div class="msg" id="amsg"></div></div>
+<div class="card"><b>Register (one time)</b><p class="sub">Add your name and matric number. A course rep will approve it.</p><input id="rn" placeholder="Full name"><input id="rm" placeholder="Matric number" autocapitalize="characters"><button class="btn s" id="rs">Register</button><div class="msg" id="rmsg"></div></div>
+</section>
+<section id="po" hidden></section>
+</main>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getFirestore,doc,collection,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {firebaseConfig} from "./firebase-config.js";
+
+const COURSES=[["ECO 301","Intermediate Microeconomics 1"],["ECO 331","Intermediate Macroeconomics 1"],["ECO 305","History of Economic Thought"],["ECO 307","Project Evaluation"],["SSC 301","Innovation in Social Science"],["ECO 311","Mathematics for Economist III"],["ECO 317","Environmental Economics"],["ECO 319","Statistics for Economists II"],["ECO 337","International Trade"],["ECO 303","Applied Monetary Economics"]];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const tm=t=>new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+const t0=new Date().setHours(0,0,0,0);
+const opts=COURSES.map(c=>`<option value="${c[0]}">${c[0]} · ${c[1]}</option>`).join("");
+$("ac").innerHTML=opts;
+const warn=t=>{$("warn").textContent=t;$("warn").hidden=false};
+let db=null,status=[],sessions=[],atts=[],roster=[],pin=null,strict=false,isPoster=false,newCode=null,cmsg="";
+const D=p=>doc(db,p),list=s=>s.docs.map(d=>({id:d.id,...d.data()}));
+const idOf=m=>m.replace(/[^A-Z0-9]/g,"");
+
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+  ["st","at","po"].forEach(id=>$(id).hidden=id!==b.dataset.t);
+});
+
+function renderStatus(){
+  const L={h:["Holding","h"],c:["Cancelled","c"],m:["Moved","m"]};
+  $("st").innerHTML=COURSES.map(([code,title])=>{
+    const s=status.find(x=>x.course===code);
+    const l=s?L[s.kind]:["No update","n"];
+    return `<div class="card"><div class="row"><div><b>${code}</b><br><small>${title}</small></div><span class="b ${l[1]}">${l[0]}</span></div>${s?`<div style="margin-top:8px">${esc(s.note||"")}<br><small>Posted ${tm(s.t)} by ${esc(s.by||"poster")}</small></div>`:""}</div>`;
+  }).join("");
+}
+
+function renderPoster(){
+  const el=$("po");
+  if(!db){el.innerHTML="";return}
+  if(!isPoster){
+    el.innerHTML=`<div class="card"><b>${pin===null?"Set up poster code":"Poster login"}</b><p class="sub">${pin===null?"Choose a code for lecturers and course reps. Share it only with them.":"For lecturers and course reps only."}</p><input id="pp" type="password" placeholder="Poster code"><button class="btn" id="pg">${pin===null?"Save code":"Unlock"}</button><div class="msg" id="pmsg"></div></div>`;
+    $("pg").onclick=async()=>{
+      const v=$("pp").value.trim();
+      if(v.length<4){$("pmsg").textContent="Use at least 4 characters.";return}
+      if(pin===null){await setDoc(D("config/poster"),{pin:v});isPoster=true;renderPoster()}
+      else if(v===pin){isPoster=true;renderPoster()}
+      else $("pmsg").textContent="Wrong code.";
+    };
+    return;
+  }
+  const pend=roster.filter(r=>r.status==="pending");
+  el.innerHTML=`<div class="card"><b>Post class status</b>
+<select id="pc">${opts}</select>
+<select id="pk"><option value="h">Class is holding</option><option value="c">Class cancelled</option><option value="m">Class moved</option></select>
+<input id="pn" placeholder="Note (new time, venue, reason)">
+<input id="pb" placeholder="Your name or title (e.g. Dr Adekunjo)">
+<button class="btn" id="ps">Post</button><div class="msg" id="pm1"></div></div>
+<div class="card"><b>Open attendance</b>
+<select id="sc">${opts}</select>
+<button class="btn" id="so">Start 3-minute session</button>
+${newCode?`<p class="sub" style="text-align:center">Show this code in class</p><div class="code">${newCode}</div>`:""}
+<div class="msg" id="pm2"></div></div>
+<div class="card"><b>Today’s sessions</b>${sessions.length?sessions.map(s=>{const rs=atts.filter(a=>a.sid===s.id).sort((a,b)=>a.t-b.t);return `<div class="row" style="margin-top:8px"><div>${s.course}<br><small>${tm(+s.id)} · ${rs.length} present</small></div><button class="btn s" style="width:auto" data-x="${s.id}">Export</button></div>`+rs.map(r=>`<div class="row" style="margin:4px 0;font-size:14px"><span>${esc(r.name)} <small>${esc(r.matric)}</small></span><button class="b c" style="background:none;cursor:pointer" data-r="${esc(r.id)}">Remove</button></div>`).join("")}).join(""):"<p class=sub>None yet.</p>"}</div>
+<div class="card"><b>Class list</b><p class="sub">${roster.filter(r=>r.status==="approved").length} approved · ${pend.length} waiting</p><button class="btn s" id="st2">${strict?"Approval required to sign: ON (tap to turn off)":"Approval required to sign: OFF (tap to turn on)"}</button>${pend.length?`<button class="btn s" id="aa">Approve all waiting</button>`:""}${pend.map(r=>`<div class="row" style="margin:6px 0;font-size:14px"><span>${esc(r.name)} <small>${esc(r.matric)}</small></span><span><button class="b h" style="background:none;cursor:pointer" data-ok="${esc(r.id)}">Approve</button> <button class="b c" style="background:none;cursor:pointer" data-no="${esc(r.id)}">Reject</button></span></div>`).join("")}</div>
+<div class="card"><b>Change poster code</b><input id="cn" type="password" placeholder="New poster code"><button class="btn s" id="cc">Change code</button><div class="msg">${cmsg}</div></div>`;
+  $("ps").onclick=async()=>{
+    const t=Date.now();
+    await setDoc(D("status/"+t),{course:$("pc").value,kind:$("pk").value,note:$("pn").value.trim(),by:$("pb").value.trim(),t});
+    $("pm1").textContent="Posted.";$("pn").value="";
+  };
+  $("so").onclick=async()=>{
+    const t=Date.now(),code=String(Math.floor(1000+Math.random()*9000));
+    await setDoc(D("sessions/"+t),{course:$("sc").value,code,exp:t+180000,t});
+    newCode=code;renderPoster();
+  };
+  el.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{
+    const s=sessions.find(x=>x.id===b.dataset.x),rows=atts.filter(a=>a.sid===s.id).sort((a,b)=>a.t-b.t);
+    const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+    const csv=["Course,Date,No.,Name,Matric,Time"].concat(rows.map((r,i)=>[s.course,new Date(+s.id).toLocaleDateString(),i+1,q(r.name),q(r.matric),tm(r.t)].join(","))).join("\n");
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+    a.download=`${s.course.replace(" ","")}_attendance_${new Date(+s.id).toISOString().slice(0,10)}.csv`;a.click();
+  });
+  el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>deleteDoc(D("att/"+b.dataset.r)));
+  $("st2").onclick=()=>setDoc(D("config/rules"),{strict:!strict});
+  if($("aa"))$("aa").onclick=async()=>{for(const r of pend)await updateDoc(D("roster/"+r.id),{status:"approved"})};
+  el.querySelectorAll("[data-ok]").forEach(b=>b.onclick=()=>updateDoc(D("roster/"+b.dataset.ok),{status:"approved"}));
+  el.querySelectorAll("[data-no]").forEach(b=>b.onclick=()=>deleteDoc(D("roster/"+b.dataset.no)));
+  $("cc").onclick=async()=>{
+    const v=$("cn").value.trim();
+    if(v.length<4){cmsg="Use at least 4 characters.";renderPoster();return}
+    await setDoc(D("config/poster"),{pin:v});
+    cmsg="Code changed. Share the new one with your posters.";renderPoster();
+  };
+}
+
+$("as").onclick=async()=>{
+  const m=$("amsg"),course=$("ac").value,name=$("an").value.trim(),mat=$("am").value.trim().toUpperCase(),code=$("ak").value.trim();
+  if(!db){m.textContent="App isn’t connected yet.";return}
+  if(!name||!mat||!code){m.textContent="Fill in every box.";return}
+  const s=sessions.find(x=>x.course===course&&x.code===code&&Date.now()<x.exp);
+  if(!s){m.textContent="Invalid or expired code for this course.";return}
+  const id=idOf(mat),rr=roster.find(x=>x.id===id);
+  if(strict&&!(rr&&rr.status==="approved")){m.textContent="Your matric number isn’t approved yet. Register below and ask a course rep.";return}
+  let dev="";try{dev=localStorage.getItem("dev")||"";if(!dev){dev=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("dev",dev)}}catch(e){}
+  if(dev&&atts.some(a=>a.sid===s.id&&a.dev===dev)){m.textContent="This phone has already signed for this class.";return}
+  const ref=D("att/"+s.id+"_"+id);
+  if((await getDoc(ref)).exists()){m.textContent="This matric number has already signed.";return}
+  await setDoc(ref,{sid:s.id,course,name:strict?rr.name:name,matric:mat,dev,t:Date.now()});
+  m.textContent="You’re marked present for "+course+".";
+};
+
+$("rs").onclick=async()=>{
+  const m=$("rmsg"),name=$("rn").value.trim(),mat=$("rm").value.trim().toUpperCase();
+  if(!db){m.textContent="App isn’t connected yet.";return}
+  if(!name||!mat){m.textContent="Fill in both boxes.";return}
+  const ref=D("roster/"+idOf(mat)),ex=await getDoc(ref);
+  if(ex.exists()){m.textContent=ex.data().status==="approved"?"You’re already approved.":"Already registered. Waiting for approval.";return}
+  await setDoc(ref,{name,matric:mat,status:"pending",t:Date.now()});
+  m.textContent="Registered. A course rep will approve you.";
+};
+
+renderStatus();
+try{
+  if(String(firebaseConfig.apiKey).includes("PASTE"))throw new Error("config");
+  db=getFirestore(initializeApp(firebaseConfig));
+  const err=()=>warn("Can’t reach the database. Check your connection.");
+  const today=c=>query(collection(db,c),where("t",">=",t0));
+  onSnapshot(today("status"),s=>{status=list(s).sort((a,b)=>b.t-a.t);renderStatus()},err);
+  onSnapshot(today("sessions"),s=>{sessions=list(s).sort((a,b)=>b.t-a.t);renderPoster()},err);
+  onSnapshot(today("att"),s=>{atts=list(s);renderPoster()},err);
+  onSnapshot(collection(db,"roster"),s=>{roster=list(s);renderPoster()},err);
+  onSnapshot(D("config/poster"),d=>{pin=d.exists()?d.data().pin:null;renderPoster()},err);
+  onSnapshot(D("config/rules"),d=>{strict=d.exists()&&d.data().strict===true;renderPoster()},err);
+}catch(e){warn("Setup not finished: the Firebase details in firebase-config.js are missing.")}
+</script></body></html>

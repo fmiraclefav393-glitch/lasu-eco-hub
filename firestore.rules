@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Prototype rules: only the collections this app uses are open.
+    match /{col}/{docId} {
+      allow read, write: if col in ['status','sessions','att','roster','config'];
+    }
+  }
+}
