@@ -2,6 +2,9 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>300L Economics Class Hub</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f6b3f">
+<link rel="apple-touch-icon" href="icon-192.png">
 <style>
 :root{--bg:#f6f7f4;--card:#fff;--tx:#17211b;--mu:#66726b;--ac:#0f6b3f;--bd:#dde3dd;--ok:#0f6b3f;--no:#b3261e;--mv:#9a6700;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
 @media(prefers-color-scheme:dark){:root{--bg:#111713;--card:#1a221d;--tx:#eaf0eb;--mu:#9aa89f;--ac:#4cc489;--bd:#2c382f;--ok:#4cc489;--no:#ff8a80;--mv:#e0b34a;color-scheme:dark}}
@@ -25,7 +28,21 @@ input,select,.btn{width:100%;padding:11px;margin:5px 0;border:1px solid var(--bd
 .warn{background:var(--card);border:1px solid var(--mv);color:var(--mv);padding:10px;border-radius:10px;font-size:14px}
 small{color:var(--mu)}
 [hidden]{display:none!important}
-</style></head><body><main>
+#splash{position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--bg);transition:opacity .5s}
+#splash.out{opacity:0;pointer-events:none}
+#splash img{width:112px;height:112px;border-radius:26px;animation:pop .7s cubic-bezier(.2,1.4,.4,1) both,pulse 1.8s ease-in-out .7s infinite}
+#splash h2{margin:6px 0 0;font-size:22px;animation:rise .6s .3s both}
+#splash p{margin:0;color:var(--mu);font-size:14px;animation:rise .6s .5s both}
+.bar{width:120px;height:4px;border-radius:9px;background:var(--bd);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:40%;background:var(--ac);animation:slide 1.1s ease-in-out infinite}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pulse{50%{transform:scale(1.06)}}
+@keyframes rise{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+@keyframes slide{0%{margin-left:-40%}100%{margin-left:100%}}
+@media(prefers-reduced-motion:reduce){#splash *{animation:none!important}}
+</style></head><body>
+<div id="splash"><img id="logo" alt=""><h2 id="spn"></h2><p id="spt"></p><div class="bar"><i></i></div></div>
+<main>
 <h1>300L Economics Class Hub</h1>
 <p class="sub">LASU Ojo · Class status and attendance</p>
 <div id="warn" class="warn" hidden></div>
@@ -45,7 +62,7 @@ small{color:var(--mu)}
 </main>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {getFirestore,doc,collection,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {getFirestore,doc,collection,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,getDocs} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {firebaseConfig} from "./firebase-config.js";
 
 const COURSES=[["ECO 301","Intermediate Microeconomics 1"],["ECO 331","Intermediate Macroeconomics 1"],["ECO 305","History of Economic Thought"],["ECO 307","Project Evaluation"],["SSC 301","Innovation in Social Science"],["ECO 311","Mathematics for Economist III"],["ECO 317","Environmental Economics"],["ECO 319","Statistics for Economists II"],["ECO 337","International Trade"],["ECO 303","Applied Monetary Economics"]];
@@ -55,20 +72,30 @@ const tm=t=>new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})
 const t0=new Date().setHours(0,0,0,0);
 const opts=COURSES.map(c=>`<option value="${c[0]}">${c[0]} · ${c[1]}</option>`).join("");
 $("ac").innerHTML=opts;
+
+// ===== MAKE IT YOURS: change these 3 values (logo file name, title, tagline) =====
+const SPLASH={logo:"logo.svg",name:"300L Economics",tagline:"Class Hub · LASU Ojo"};
+// =================================================================================
+$("logo").src=SPLASH.logo;$("logo").onerror=()=>{$("logo").style.display="none"};
+$("spn").textContent=SPLASH.name;$("spt").textContent=SPLASH.tagline;
+const t00=Date.now();let hid=false;
+const hideSplash=()=>{if(hid)return;hid=true;setTimeout(()=>{const e=$("splash");e.classList.add("out");setTimeout(()=>e.remove(),600)},Math.max(0,1600-(Date.now()-t00)))};
+setTimeout(hideSplash,4000);
 const warn=t=>{$("warn").textContent=t;$("warn").hidden=false};
-let db=null,status=[],sessions=[],atts=[],roster=[],pin=null,strict=false,isPoster=false,newCode=null,cmsg="";
+let db=null,board={},sessions=[],atts=[],roster=[],pin=undefined,strict=false,isPoster=false,newCode=null,cmsg="",share="";
 const D=p=>doc(db,p),list=s=>s.docs.map(d=>({id:d.id,...d.data()}));
 const idOf=m=>m.replace(/[^A-Z0-9]/g,"");
 
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
   ["st","at","po"].forEach(id=>$(id).hidden=id!==b.dataset.t);
+  if(b.dataset.t==="po"&&db&&!isPoster)getDoc(D("config/poster")).then(d=>{pin=d.exists()?d.data().pin:null;renderPoster()}).catch(()=>warn("Can’t reach the database."));
 });
 
 function renderStatus(){
   const L={h:["Holding","h"],c:["Cancelled","c"],m:["Moved","m"]};
   $("st").innerHTML=COURSES.map(([code,title])=>{
-    const s=status.find(x=>x.course===code);
+    let s=board[code.replace(" ","")];if(s&&s.t<t0)s=null;
     const l=s?L[s.kind]:["No update","n"];
     return `<div class="card"><div class="row"><div><b>${code}</b><br><small>${title}</small></div><span class="b ${l[1]}">${l[0]}</span></div>${s?`<div style="margin-top:8px">${esc(s.note||"")}<br><small>Posted ${tm(s.t)} by ${esc(s.by||"poster")}</small></div>`:""}</div>`;
   }).join("");
@@ -78,12 +105,13 @@ function renderPoster(){
   const el=$("po");
   if(!db){el.innerHTML="";return}
   if(!isPoster){
+    if(pin===undefined){el.innerHTML="<p class=sub>Loading…</p>";return}
     el.innerHTML=`<div class="card"><b>${pin===null?"Set up poster code":"Poster login"}</b><p class="sub">${pin===null?"Choose a code for lecturers and course reps. Share it only with them.":"For lecturers and course reps only."}</p><input id="pp" type="password" placeholder="Poster code"><button class="btn" id="pg">${pin===null?"Save code":"Unlock"}</button><div class="msg" id="pmsg"></div></div>`;
     $("pg").onclick=async()=>{
       const v=$("pp").value.trim();
       if(v.length<4){$("pmsg").textContent="Use at least 4 characters.";return}
-      if(pin===null){await setDoc(D("config/poster"),{pin:v});isPoster=true;renderPoster()}
-      else if(v===pin){isPoster=true;renderPoster()}
+      if(pin===null){await setDoc(D("config/poster"),{pin:v});isPoster=true;startPoster();renderPoster()}
+      else if(v===pin){isPoster=true;startPoster();renderPoster()}
       else $("pmsg").textContent="Wrong code.";
     };
     return;
@@ -94,7 +122,7 @@ function renderPoster(){
 <select id="pk"><option value="h">Class is holding</option><option value="c">Class cancelled</option><option value="m">Class moved</option></select>
 <input id="pn" placeholder="Note (new time, venue, reason)">
 <input id="pb" placeholder="Your name or title (e.g. Dr Adekunjo)">
-<button class="btn" id="ps">Post</button><div class="msg" id="pm1"></div></div>
+<button class="btn" id="ps">Post</button>${share?`<a class="btn" style="display:block;text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(share)}">Share to WhatsApp</a>`:""}<div class="msg" id="pm1"></div></div>
 <div class="card"><b>Open attendance</b>
 <select id="sc">${opts}</select>
 <button class="btn" id="so">Start 3-minute session</button>
@@ -105,8 +133,10 @@ ${newCode?`<p class="sub" style="text-align:center">Show this code in class</p><
 <div class="card"><b>Change poster code</b><input id="cn" type="password" placeholder="New poster code"><button class="btn s" id="cc">Change code</button><div class="msg">${cmsg}</div></div>`;
   $("ps").onclick=async()=>{
     const t=Date.now();
-    await setDoc(D("status/"+t),{course:$("pc").value,kind:$("pk").value,note:$("pn").value.trim(),by:$("pb").value.trim(),t});
-    $("pm1").textContent="Posted.";$("pn").value="";
+    await setDoc(D("config/board"),{[$("pc").value.replace(" ","")]:{kind:$("pk").value,note:$("pn").value.trim(),by:$("pb").value.trim(),t}},{merge:true});
+    const c=COURSES.find(x=>x[0]===$("pc").value),k={h:"is holding",c:"is CANCELLED",m:"has MOVED"}[$("pk").value],n=$("pn").value.trim();
+    share=`📢 ${c[0]} (${c[1]}) ${k} today.${n?"\n"+n:""}\nAll updates: ${location.origin+location.pathname}`;
+    renderPoster();$("pm1").textContent="Posted. Tap Share to WhatsApp to tell the class group.";
   };
   $("so").onclick=async()=>{
     const t=Date.now(),code=String(Math.floor(1000+Math.random()*9000));
@@ -138,39 +168,58 @@ $("as").onclick=async()=>{
   const m=$("amsg"),course=$("ac").value,name=$("an").value.trim(),mat=$("am").value.trim().toUpperCase(),code=$("ak").value.trim();
   if(!db){m.textContent="App isn’t connected yet.";return}
   if(!name||!mat||!code){m.textContent="Fill in every box.";return}
-  const s=sessions.find(x=>x.course===course&&x.code===code&&Date.now()<x.exp);
-  if(!s){m.textContent="Invalid or expired code for this course.";return}
-  const id=idOf(mat),rr=roster.find(x=>x.id===id);
-  if(strict&&!(rr&&rr.status==="approved")){m.textContent="Your matric number isn’t approved yet. Register below and ask a course rep.";return}
-  let dev="";try{dev=localStorage.getItem("dev")||"";if(!dev){dev=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("dev",dev)}}catch(e){}
-  if(dev&&atts.some(a=>a.sid===s.id&&a.dev===dev)){m.textContent="This phone has already signed for this class.";return}
-  const ref=D("att/"+s.id+"_"+id);
-  if((await getDoc(ref)).exists()){m.textContent="This matric number has already signed.";return}
-  await setDoc(ref,{sid:s.id,course,name:strict?rr.name:name,matric:mat,dev,t:Date.now()});
-  m.textContent="You’re marked present for "+course+".";
+  m.textContent="Checking…";
+  try{
+    const q=await getDocs(query(collection(db,"sessions"),where("code","==",code),where("course","==",course)));
+    const s=list(q).filter(x=>Date.now()<x.exp).sort((a,b)=>b.t-a.t)[0];
+    if(!s){m.textContent="Invalid or expired code for this course.";return}
+    const id=idOf(mat),rs=await getDoc(D("config/rules")),need=rs.exists()&&rs.data().strict===true;
+    let nm=name;
+    if(need){
+      const r=await getDoc(D("roster/"+id));
+      if(!r.exists()||r.data().status!=="approved"){m.textContent="Your matric number isn’t approved yet. Register below and ask a course rep.";return}
+      nm=r.data().name;
+    }
+    let dev="";try{dev=localStorage.getItem("dev")||"";if(!dev){dev=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("dev",dev)}}catch(e){}
+    if(dev){
+      const dq=await getDocs(query(collection(db,"att"),where("sid","==",s.id),where("dev","==",dev)));
+      if(!dq.empty){m.textContent="This phone has already signed for this class.";return}
+    }
+    const ref=D("att/"+s.id+"_"+id);
+    if((await getDoc(ref)).exists()){m.textContent="This matric number has already signed.";return}
+    await setDoc(ref,{sid:s.id,course,name:nm,matric:mat,dev,t:Date.now()});
+    m.textContent="You’re marked present for "+course+".";
+  }catch(e){m.textContent="Something went wrong. Check your connection and try again."}
 };
 
 $("rs").onclick=async()=>{
   const m=$("rmsg"),name=$("rn").value.trim(),mat=$("rm").value.trim().toUpperCase();
   if(!db){m.textContent="App isn’t connected yet.";return}
   if(!name||!mat){m.textContent="Fill in both boxes.";return}
-  const ref=D("roster/"+idOf(mat)),ex=await getDoc(ref);
-  if(ex.exists()){m.textContent=ex.data().status==="approved"?"You’re already approved.":"Already registered. Waiting for approval.";return}
-  await setDoc(ref,{name,matric:mat,status:"pending",t:Date.now()});
-  m.textContent="Registered. A course rep will approve you.";
+  try{
+    const ref=D("roster/"+idOf(mat)),ex=await getDoc(ref);
+    if(ex.exists()){m.textContent=ex.data().status==="approved"?"You’re already approved.":"Already registered. Waiting for approval.";return}
+    await setDoc(ref,{name,matric:mat,status:"pending",t:Date.now()});
+    m.textContent="Registered. A course rep will approve you.";
+  }catch(e){m.textContent="Something went wrong. Try again."}
 };
+
+const err=()=>{warn("Can’t reach the database. Check your connection.");hideSplash()};
+// Only posters listen to the big collections, so students use very few database reads.
+function startPoster(){
+  if(startPoster.on)return;startPoster.on=true;
+  const today=c=>query(collection(db,c),where("t",">=",t0));
+  onSnapshot(today("sessions"),s=>{sessions=list(s).sort((a,b)=>b.t-a.t);renderPoster()},err);
+  onSnapshot(today("att"),s=>{atts=list(s);renderPoster()},err);
+  onSnapshot(collection(db,"roster"),s=>{roster=list(s);renderPoster()},err);
+  onSnapshot(D("config/rules"),d=>{strict=d.exists()&&d.data().strict===true;renderPoster()},err);
+}
 
 renderStatus();
 try{
   if(String(firebaseConfig.apiKey).includes("PASTE"))throw new Error("config");
   db=getFirestore(initializeApp(firebaseConfig));
-  const err=()=>warn("Can’t reach the database. Check your connection.");
-  const today=c=>query(collection(db,c),where("t",">=",t0));
-  onSnapshot(today("status"),s=>{status=list(s).sort((a,b)=>b.t-a.t);renderStatus()},err);
-  onSnapshot(today("sessions"),s=>{sessions=list(s).sort((a,b)=>b.t-a.t);renderPoster()},err);
-  onSnapshot(today("att"),s=>{atts=list(s);renderPoster()},err);
-  onSnapshot(collection(db,"roster"),s=>{roster=list(s);renderPoster()},err);
-  onSnapshot(D("config/poster"),d=>{pin=d.exists()?d.data().pin:null;renderPoster()},err);
-  onSnapshot(D("config/rules"),d=>{strict=d.exists()&&d.data().strict===true;renderPoster()},err);
-}catch(e){warn("Setup not finished: the Firebase details in firebase-config.js are missing.")}
+  onSnapshot(D("config/board"),d=>{board=d.exists()?d.data():{};renderStatus();hideSplash()},err);
+}catch(e){warn("Setup not finished: the Firebase details in firebase-config.js are missing.");hideSplash()}
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script></body></html>
