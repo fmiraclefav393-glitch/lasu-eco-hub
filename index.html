@@ -64,7 +64,7 @@ window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElem
 <div class="card"><b>Register (one time)</b><p class="sub">Add your name and matric number. A course rep will approve it.</p><input id="rn" placeholder="Full name"><input id="rm" placeholder="Matric number" autocapitalize="characters"><button class="btn s" id="rs">Register</button><div class="msg" id="rmsg"></div></div>
 </section>
 <section id="po" hidden></section>
-<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 3</footer>
+<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 4</footer>
 </main>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -88,7 +88,7 @@ const t00=Date.now();let hid=false;
 const hideSplash=()=>{if(hid)return;hid=true;window.__ready=true;setTimeout(()=>{const e=$("splash");e.classList.add("out");setTimeout(()=>e.remove(),600)},Math.max(0,1600-(Date.now()-t00)))};
 setTimeout(()=>{hideSplash();if(!boardReady&&db)warn("Still connecting… check your internet.")},4000);
 const warn=t=>{$("warn").textContent=t;$("warn").hidden=false};
-let db=null,board={},boardReady=false,viewDay=0,pdate="",sessions=[],atts=[],roster=[],pin=undefined,strict=false,isPoster=false,newCode=null,cmsg="",share="";
+let db=null,board={},boardReady=false,viewDay=0,pdate="",fbApp=null,me=null,AU=null,sessions=[],atts=[],roster=[],pin=undefined,strict=false,isPoster=false,newCode=null,cmsg="",share="";
 const D=p=>doc(db,p),list=s=>s.docs.map(d=>({id:d.id,...d.data()}));
 const idOf=m=>m.replace(/[^A-Z0-9]/g,"");
 
@@ -136,7 +136,7 @@ function renderPoster(){
     $("pg").onclick=async()=>{
       const v=$("pp").value.trim();
       if(v.length<4){$("pmsg").textContent="Use at least 4 characters.";return}
-      if(pin===null){await setDoc(D("config/poster"),{pin:v});isPoster=true;startPoster();renderPoster()}
+      if(pin===null){try{await setDoc(D("config/poster"),{pin:v})}catch(x){$("pmsg").textContent="Only the owner can set the poster code. Ask Miracle.";return}isPoster=true;startPoster();renderPoster()}
       else if(v===pin){isPoster=true;startPoster();renderPoster()}
       else $("pmsg").textContent="Wrong code.";
     };
@@ -165,7 +165,7 @@ ${newCode?`<p class="sub" style="text-align:center">Show this code in class</p><
 <div class="msg" id="pm2"></div></div>
 <div class="card"><b>Today’s sessions</b>${sessions.length?sessions.map(s=>{const rs=atts.filter(a=>a.sid===s.id).sort((a,b)=>a.t-b.t);return `<div class="row" style="margin-top:8px"><div>${s.course}<br><small>${tm(+s.id)} · ${rs.length} present</small></div><button class="btn s" style="width:auto" data-x="${s.id}">Export</button></div>`+rs.map(r=>`<div class="row" style="margin:4px 0;font-size:14px"><span>${esc(r.name)} <small>${esc(r.matric)}</small></span><button class="b c" style="background:none;cursor:pointer" data-r="${esc(r.id)}">Remove</button></div>`).join("")}).join(""):"<p class=sub>None yet.</p>"}</div>
 <div class="card"><b>Class list</b><p class="sub">${roster.filter(r=>r.status==="approved").length} approved · ${pend.length} waiting</p><button class="btn s" id="st2">${strict?"Approval required to sign: ON (tap to turn off)":"Approval required to sign: OFF (tap to turn on)"}</button>${pend.length?`<button class="btn s" id="aa">Approve all waiting</button>`:""}${pend.map(r=>`<div class="row" style="margin:6px 0;font-size:14px"><span>${esc(r.name)} <small>${esc(r.matric)}</small></span><span><button class="b h" style="background:none;cursor:pointer" data-ok="${esc(r.id)}">Approve</button> <button class="b c" style="background:none;cursor:pointer" data-no="${esc(r.id)}">Reject</button></span></div>`).join("")}</div>
-<div class="card"><b>Change poster code</b><input id="cn" type="password" placeholder="New poster code"><button class="btn s" id="cc">Change code</button><div class="msg">${cmsg}</div></div>`;
+<div class="card"><b>Change poster code</b>${me?`<p class="sub">Signed in as ${esc(me.email||"owner")}</p><input id="cn" type="password" placeholder="New poster code"><button class="btn s" id="cc">Change code</button>`:`<p class="sub">Only the owner can change the code. Sign in with the owner’s Google account.</p><button class="btn s" id="so2">Owner sign-in with Google</button>`}<div class="msg">${cmsg}</div></div>`;
   KEEP.forEach(id=>{if(saved[id]!==undefined&&$(id))$(id).value=saved[id]});
   el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>updateDoc(D("config/board"),{[b.dataset.del]:deleteField()}));
   el.querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>{
@@ -213,11 +213,17 @@ ${newCode?`<p class="sub" style="text-align:center">Show this code in class</p><
   if($("aa"))$("aa").onclick=async()=>{for(const r of pend)await updateDoc(D("roster/"+r.id),{status:"approved"})};
   el.querySelectorAll("[data-ok]").forEach(b=>b.onclick=()=>updateDoc(D("roster/"+b.dataset.ok),{status:"approved"}));
   el.querySelectorAll("[data-no]").forEach(b=>b.onclick=()=>deleteDoc(D("roster/"+b.dataset.no)));
-  $("cc").onclick=async()=>{
+  if($("so2"))$("so2").onclick=async()=>{
+    try{const {m,a}=await loadAuth();await m.signInWithPopup(a,new m.GoogleAuthProvider());cmsg=""}
+    catch(x){cmsg="Sign-in didn’t complete. Try again."}
+    renderPoster();
+  };
+  if($("cc"))$("cc").onclick=async()=>{
     const v=$("cn").value.trim();
     if(v.length<4){cmsg="Use at least 4 characters.";renderPoster();return}
-    await setDoc(D("config/poster"),{pin:v});
-    cmsg="Code changed. Share the new one with your posters.";renderPoster();
+    try{await setDoc(D("config/poster"),{pin:v});cmsg="Code changed. Share the new one with your posters."}
+    catch(x){cmsg="Only the owner can change the code."}
+    renderPoster();
   };
 }
 
@@ -261,6 +267,13 @@ $("rs").onclick=async()=>{
   }catch(e){m.textContent="Something went wrong. Try again."}
 };
 
+async function loadAuth(){
+  if(AU)return AU;
+  const m=await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js");
+  const a=m.getAuth(fbApp);
+  m.onAuthStateChanged(a,u=>{me=u;renderPoster()});
+  AU={m,a};return AU;
+}
 const err=()=>{warn("Can’t reach the database. Check your connection.");hideSplash()};
 // Only posters listen to the big collections, so students use very few database reads.
 function startPoster(){
@@ -270,12 +283,13 @@ function startPoster(){
   onSnapshot(today("att"),s=>{atts=list(s);renderPoster()},err);
   onSnapshot(collection(db,"roster"),s=>{roster=list(s);renderPoster()},err);
   onSnapshot(D("config/rules"),d=>{strict=d.exists()&&d.data().strict===true;renderPoster()},err);
+  loadAuth().catch(()=>{});
 }
 
 renderStatus();
 try{
   if(String(firebaseConfig.apiKey).includes("PASTE"))throw new Error("config");
-  db=getFirestore(initializeApp(firebaseConfig));
+  fbApp=initializeApp(firebaseConfig);db=getFirestore(fbApp);
   onSnapshot(D("config/board"),d=>{board=d.exists()?d.data():{};boardReady=true;if($("warn").textContent.startsWith("Still"))$("warn").hidden=true;renderStatus();hideSplash()},err);
 }catch(e){warn("Setup not finished: the Firebase details in firebase-config.js are missing.");hideSplash()}
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
