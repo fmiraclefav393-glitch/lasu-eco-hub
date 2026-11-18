@@ -44,6 +44,26 @@ small{color:var(--mu)}
 @keyframes rise{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
 @keyframes slide{0%{margin-left:-40%}100%{margin-left:100%}}
 @media(prefers-reduced-motion:reduce){#splash *{animation:none!important}}
+.glass{background:rgba(127,127,127,.16);background:color-mix(in srgb,var(--card) 62%,transparent);-webkit-backdrop-filter:blur(12px) saturate(1.5);backdrop-filter:blur(12px) saturate(1.5);border:1px solid rgba(127,127,127,.3);box-shadow:0 6px 20px rgba(0,0,0,.16)}
+#thb{width:42px;height:42px;padding:0;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--tx);cursor:pointer}
+#thb svg,.opt svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
+.pop{position:absolute;right:0;top:50px;z-index:30;display:flex;gap:6px;padding:6px;border-radius:18px;transform-origin:top right;animation:popin .18s ease-out}
+.opt{width:44px;height:44px;padding:0;border-radius:13px;border:1px solid transparent;background:transparent;color:var(--tx);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.opt.on{background:rgba(127,127,127,.22);border-color:var(--ac);color:var(--ac)}
+@keyframes popin{from{opacity:0;transform:scale(.9) translateY(-4px)}to{opacity:1;transform:none}}
+.sun.play .ray{animation:shoot .8s ease-in-out}
+@keyframes shoot{0%{transform:translate(0,0);opacity:1}38%{transform:translate(calc(var(--dx)*5px),calc(var(--dy)*5px));opacity:0}39%{transform:translate(calc(var(--dx)*-5px),calc(var(--dy)*-5px));opacity:0}100%{transform:translate(0,0);opacity:1}}
+.sun.play .core{transform-origin:12px 12px;animation:beat .8s ease-in-out}
+@keyframes beat{40%{transform:scale(1.2)}100%{transform:scale(1)}}
+.moon .st{fill:currentColor;stroke:none;transform-origin:0 0}
+.moon.play .crescent{transform-origin:12px 12px;animation:rock .8s ease-in-out}
+@keyframes rock{0%{transform:rotate(0)}30%{transform:rotate(-18deg)}65%{transform:rotate(10deg)}100%{transform:rotate(0)}}
+.moon.play .st{animation:twinkle .8s ease-in-out both}
+.moon.play .s2{animation-delay:.12s}.moon.play .s3{animation-delay:.24s}
+@keyframes twinkle{0%{transform:scale(1)}35%{transform:scale(2.3) rotate(45deg)}100%{transform:scale(1) rotate(90deg)}}
+.auto.play .half{transform-origin:12px 12px;animation:coin .8s cubic-bezier(.5,0,.2,1)}
+@keyframes coin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.sun *,.moon *,.auto *,.pop{animation:none!important}}
 </style></head><body>
 <div id="splash"><img id="logo" alt=""><h2 id="spn"></h2><p id="spt"></p><div class="bar"><i></i></div></div>
 <script>
@@ -51,7 +71,7 @@ small{color:var(--mu)}
 window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElementById("spt");if(p)p.innerHTML='Taking too long. Check your internet.<br><button style="margin-top:12px;padding:10px 20px;border:0;border-radius:10px;background:#0f6b3f;color:#fff;font:inherit;font-weight:700" onclick="location.reload()">Try again</button>'},9000);
 </script>
 <main>
-<div class="row" style="align-items:center;gap:10px"><h1 style="flex:1">300L Economics Class Hub</h1><select id="theme" aria-label="Appearance" style="width:auto;margin:0;padding:6px 8px;font-size:13px"><option value="auto">Phone default</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+<div class="row" style="align-items:center;gap:10px"><h1 style="flex:1">300L Economics Class Hub</h1><div id="thm" style="position:relative"><button id="thb" class="glass" aria-label="Appearance" aria-haspopup="true" aria-expanded="false"></button><div id="thp" class="glass pop" role="menu" hidden><button class="opt" data-v="light" role="menuitem" aria-label="Light mode" title="Light"></button><button class="opt" data-v="dark" role="menuitem" aria-label="Dark mode" title="Dark"></button><button class="opt" data-v="auto" role="menuitem" aria-label="Phone default" title="Phone default"></button></div></div></div>
 <p class="sub">LASU Ojo · Class status and attendance</p>
 <div id="warn" class="warn" hidden></div>
 <nav><button data-t="st" class="on">Today</button><button data-t="at">Attendance</button><button data-t="mt">Materials</button><button data-t="po">Poster</button></nav>
@@ -68,7 +88,7 @@ window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElem
 </section>
 <section id="mt" hidden></section>
 <section id="po" hidden></section>
-<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 6</footer>
+<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 7</footer>
 </main>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -83,13 +103,27 @@ const t0=new Date().setHours(0,0,0,0);
 const opts=COURSES.map(c=>`<option value="${c[0]}">${c[0]} · ${c[1]}</option>`).join("");
 $("ac").innerHTML=opts;
 {
-  let sv="auto";try{sv=localStorage.getItem("theme")||"auto"}catch(e){}
-  $("theme").value=sv==="dark"||sv==="light"?sv:"auto";
-  $("theme").onchange=()=>{
-    const v=$("theme").value,r=document.documentElement;
-    try{v==="auto"?localStorage.removeItem("theme"):localStorage.setItem("theme",v)}catch(e){}
-    v==="auto"?r.removeAttribute("data-theme"):r.setAttribute("data-theme",v);
-  };
+  const SUN=`<svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle class="core" cx="12" cy="12" r="4"/>${[0,1,2,3,4,5,6,7].map(k=>{const a=k*Math.PI/4,c=Math.cos(a),d=Math.sin(a);return `<line class="ray" style="--dx:${c.toFixed(2)};--dy:${d.toFixed(2)}" x1="${(12+7*c).toFixed(2)}" y1="${(12+7*d).toFixed(2)}" x2="${(12+9.6*c).toFixed(2)}" y2="${(12+9.6*d).toFixed(2)}"/>`}).join("")}</svg>`;
+  const STAR="M0-2L.6-.6 2 0 .6.6 0 2-.6.6-2 0-.6-.6z";
+  const MOON=`<svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path class="crescent" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><g transform="translate(17.5 6.5) scale(1.1)"><path class="st s1" d="${STAR}"/></g><g transform="translate(21 3.5) scale(.7)"><path class="st s2" d="${STAR}"/></g><g transform="translate(14.5 3) scale(.6)"><path class="st s3" d="${STAR}"/></g></svg>`;
+  const AUTO=`<svg class="auto" viewBox="0 0 24 24" aria-hidden="true"><g class="half"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" style="fill:currentColor"/></g></svg>`;
+  const ICON={light:SUN,dark:MOON,auto:AUTO};
+  let cur="auto";try{const sv=localStorage.getItem("theme");if(sv==="light"||sv==="dark")cur=sv}catch(e){}
+  const paint=()=>{$("thb").innerHTML=ICON[cur];document.querySelectorAll(".opt").forEach(b=>{b.innerHTML=ICON[b.dataset.v];b.classList.toggle("on",b.dataset.v===cur)})};
+  const closePop=()=>{$("thp").hidden=true;$("thb").setAttribute("aria-expanded","false")};
+  $("thb").onclick=e=>{e.stopPropagation();const open=$("thp").hidden;$("thp").hidden=!open;$("thb").setAttribute("aria-expanded",String(open))};
+  document.addEventListener("click",e=>{if(!$("thm").contains(e.target))closePop()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")closePop()});
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    const v=b.dataset.v;cur=v;
+    try{v==="auto"?localStorage.removeItem("theme"):localStorage.setItem("theme",v)}catch(x){}
+    const r=document.documentElement;v==="auto"?r.removeAttribute("data-theme"):r.setAttribute("data-theme",v);
+    paint();
+    const svg=b.querySelector("svg");svg.classList.remove("play");void svg.getBoundingClientRect();svg.classList.add("play");
+    setTimeout(closePop,850);
+  });
+  paint();
 }
 
 // ===== MAKE IT YOURS: change these 3 values (logo file name, title, tagline) =====
