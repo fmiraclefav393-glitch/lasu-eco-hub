@@ -17,8 +17,9 @@ body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-app
 main{max-width:560px;margin:0 auto;padding:16px}
 h1{font-size:20px;margin:4px 0}
 .sub{color:var(--mu);font-size:14px;margin:0 0 12px}
-nav{display:flex;gap:6px;margin:12px 0}
-nav button{flex:1;padding:10px 2px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;font-size:14px;font-weight:600}
+nav{display:flex;gap:6px;margin:12px -2px;padding:2px 2px 10px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:1 0 auto;white-space:nowrap;padding:10px 16px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;font-size:14px;font-weight:600}
 nav button.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
 .card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:10px 0}
 .row{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
@@ -96,7 +97,7 @@ window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElem
 <div class="row" style="align-items:center;gap:10px"><h1 style="flex:1">300L Economics Class Hub</h1><div id="thm" style="position:relative"><button id="thb" class="glass" aria-label="Appearance" aria-haspopup="true" aria-expanded="false"></button><div id="thp" class="glass pop" role="menu" hidden><button class="opt" data-v="light" role="menuitem" aria-label="Light mode" title="Light"></button><button class="opt" data-v="dark" role="menuitem" aria-label="Dark mode" title="Dark"></button><button class="opt" data-v="auto" role="menuitem" aria-label="Phone default" title="Phone default"></button></div></div></div>
 <p class="sub">LASU Ojo · Class status and attendance</p>
 <div id="warn" class="warn" hidden></div>
-<nav><button data-t="st" class="on">Today</button><button data-t="at">Attendance</button><button data-t="mt">Materials</button><button data-t="po">Poster</button></nav>
+<nav><button data-t="st" class="on">Today</button><button data-t="at">Attendance</button><button data-t="mt">Materials</button><button data-t="dl">Deadlines</button><button data-t="po">Poster</button></nav>
 <section id="st"></section>
 <section id="at" hidden>
 <div class="card"><b>Sign attendance</b>
@@ -109,8 +110,9 @@ window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElem
 <div class="card"><b>Register (one time)</b><p class="sub">Add your name and matric number. A course rep will approve it.</p><input id="rn" placeholder="Full name"><input id="rm" placeholder="Matric number" autocapitalize="characters"><button class="btn s" id="rs">Register</button><div class="msg" id="rmsg"></div></div>
 </section>
 <section id="mt" hidden></section>
+<section id="dl" hidden></section>
 <section id="po" hidden></section>
-<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 8</footer>
+<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 9</footer>
 </main>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
@@ -157,14 +159,16 @@ const t00=Date.now();let hid=false;
 const hideSplash=()=>{if(hid)return;hid=true;window.__ready=true;setTimeout(()=>{const e=$("splash");e.classList.add("out");setTimeout(()=>e.remove(),600)},Math.max(0,2000-(Date.now()-t00)))};
 setTimeout(()=>{hideSplash();if(!boardReady&&db)warn("Still connecting… check your internet.")},4000);
 const warn=t=>{$("warn").textContent=t;$("warn").hidden=false};
-let db=null,board={},boardReady=false,viewDay=0,pdate="",fbApp=null,me=null,AU=null,sessions=[],atts=[],roster=[],pin=undefined,strict=false,isPoster=false,newCode=null,cmsg="",share="";
+let db=null,board={},boardReady=false,viewDay=0,pdate="",fbApp=null,me=null,AU=null,dl={},dlReady=false,dlAt=0,dlCourse="all",dlPast=false,dlEditId=null,sessions=[],atts=[],roster=[],pin=undefined,strict=false,isPoster=false,newCode=null,cmsg="",share="";
 const D=p=>doc(db,p),list=s=>s.docs.map(d=>({id:d.id,...d.data()}));
 const idOf=m=>m.replace(/[^A-Z0-9]/g,"");
 
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
-  ["st","at","mt","po"].forEach(id=>$(id).hidden=id!==b.dataset.t);
+  ["st","at","mt","dl","po"].forEach(id=>$(id).hidden=id!==b.dataset.t);
+  b.scrollIntoView({inline:"center",block:"nearest"});
   if(b.dataset.t==="mt")renderMat();
+  if(b.dataset.t==="dl")renderDL();
   if(b.dataset.t==="po"&&db&&!isPoster)getDoc(D("config/poster")).then(d=>{pin=d.exists()?d.data().pin:null;renderPoster()}).catch(()=>warn("Can’t reach the database."));
 });
 
@@ -181,7 +185,9 @@ function renderStatus(){
   const L={h:["Holding","h"],c:["Cancelled","c"],m:["Moved","m"]};
   const d=new Date(),now=d.getHours()*60+d.getMinutes(),day=ymd(addDays(viewDay));
   const tabs=`<div class="row" style="gap:8px"><button class="btn ${viewDay?"s":""}" style="flex:1" id="d0">Today</button><button class="btn ${viewDay?"":"s"}" style="flex:1" id="d1">Tomorrow</button></div><p class="sub" style="margin:8px 0 0">${dayName(addDays(viewDay))}</p>`;
-  $("st").innerHTML=tabs+COURSES.map(([code,title])=>{
+  const soon=dlItems().filter(x=>{const n=dday(x.due);return n>=0&&n<=7}).sort(dcmp).slice(0,3);
+  const cu=viewDay===0&&soon.length?`<div class="card"><b>Coming up</b>${soon.map(x=>`<div class="row" style="margin-top:8px;font-size:14px"><span>${x.course} · ${esc(x.title)}<br><small>${esc(x.type)} · ${dfmt(x.due)}${x.time?" · "+f12(x.time):""}</small></span><span class="b ${dday(x.due)<=1?"c":"m"}">${dwhen(dday(x.due))}</span></div>`).join("")}<button class="btn s" style="margin-top:10px" id="dlall">See all deadlines</button></div>`:"";
+  $("st").innerHTML=tabs+cu+COURSES.map(([code,title])=>{
     const s=board[code.replace(" ","")+"_"+day];
     let l=s?L[s.kind]:[boardReady?"No update":"Loading…","n"],line="";
     if(s&&s.kind!=="c"&&s.st&&s.en){
@@ -192,11 +198,54 @@ function renderStatus(){
     }
     return `<div class="card"><div class="row"><div><b>${code}</b><br><small>${title}</small></div><span class="b ${l[1]}">${l[0]}</span></div>${s?`<div style="margin-top:8px">${line?`<b>${line}</b><br>`:""}${esc(s.note||"")}<br><small>Posted ${tm(s.t)} by ${esc(s.by||"poster")}</small></div>`:""}</div>`;
   }).join("");
+  if($("dlall"))$("dlall").onclick=()=>document.querySelector("nav button[data-t=dl]").click();
   $("d0").onclick=()=>{viewDay=0;renderStatus()};
   $("d1").onclick=()=>{viewDay=1;renderStatus()};
 }
 setInterval(renderStatus,30000);
 
+const DTYPES=["Assignment","Test","Quiz","Exam","Project","Presentation","Other"];
+const dday=due=>Math.round((new Date(due+"T12:00:00")-new Date(ymd(new Date())+"T12:00:00"))/864e5);
+const dwhen=n=>n===0?"Due today":n===1?"Tomorrow":n>1?"In "+n+" days":n===-1?"Yesterday":(-n)+" days ago";
+const dfmt=due=>new Date(due+"T12:00:00").toLocaleDateString([],{weekday:"short",day:"numeric",month:"short"});
+const dcmp=(a,b)=>a.due.localeCompare(b.due)||(a.time||"99").localeCompare(b.time||"99");
+function dlItems(){return Object.entries(dl).filter(([k,v])=>v&&v.due&&v.title).map(([k,v])=>({id:k,...v}))}
+async function loadDL(force){
+  if(!db)return;
+  if(!force&&dlReady&&Date.now()-dlAt<60000)return;
+  try{const d=await getDoc(D("config/deadlines"));dl=d.exists()?d.data():{};dlReady=true;dlAt=Date.now()}catch(e){}
+}
+async function renderDL(force){
+  if(!db){$("dl").innerHTML="";return}
+  if(!dlReady)$("dl").innerHTML=`<p class="sub">Loading…</p>`;
+  await loadDL(force);
+  drawDL();
+}
+function drawDL(){
+  const el=$("dl");
+  const all=dlItems().filter(x=>dlCourse==="all"||x.course===dlCourse);
+  const up=all.filter(x=>dday(x.due)>=0).sort(dcmp),past=all.filter(x=>dday(x.due)<0&&dday(x.due)>=-14).sort((a,b)=>dcmp(b,a));
+  const card=x=>{const n=dday(x.due),cls=n<0?"n":n<=1?"c":n<=3?"m":"h";return `<div class="card"><div class="row"><div><b>${esc(x.title)}</b><br><small>${x.course} · ${esc(x.type)}</small></div><span class="b ${cls}" style="white-space:nowrap">${dwhen(n)}</span></div><div style="margin-top:8px"><b>${dfmt(x.due)}${x.time?" · "+f12(x.time):""}</b>${x.note?`<br>${esc(x.note)}`:""}</div>${isPoster?`<div style="margin-top:8px"><button class="b h" style="background:none;cursor:pointer" data-dle="${esc(x.id)}">Edit</button> <button class="b c" style="background:none;cursor:pointer" data-dld="${esc(x.id)}">Delete</button></div>`:""}</div>`};
+  el.innerHTML=`<select id="dlf" aria-label="Course"><option value="all">All courses</option>${COURSES.map(([c])=>`<option${c===dlCourse?" selected":""}>${c}</option>`).join("")}</select>`
+   +(up.length?up.map(card).join(""):`<div class="card"><p class="sub" style="margin:0">Nothing coming up. Check back soon.</p></div>`)
+   +(past.length?`<button class="btn s" id="dlp" style="margin-top:6px">${dlPast?"Hide":"Show"} past (${past.length})</button>`+(dlPast?past.map(card).join(""):""):"")
+   +`<button class="btn s" id="dlr" style="margin-top:10px">Refresh</button>`;
+  $("dlf").onchange=()=>{dlCourse=$("dlf").value;drawDL()};
+  if($("dlp"))$("dlp").onclick=()=>{dlPast=!dlPast;drawDL()};
+  $("dlr").onclick=()=>renderDL(true);
+  el.querySelectorAll("[data-dld]").forEach(b=>b.onclick=async()=>{
+    try{await updateDoc(D("config/deadlines"),{[b.dataset.dld]:deleteField()});delete dl[b.dataset.dld]}catch(e){}
+    drawDL();renderStatus();
+  });
+  el.querySelectorAll("[data-dle]").forEach(b=>b.onclick=()=>{
+    const x=dl[b.dataset.dle];if(!x||!$("dlc"))return;
+    document.querySelector("nav button[data-t=po]").click();
+    $("dlc").value=x.course;$("dlk").value=x.type;$("dlti").value=x.title;$("dlde").value=x.due;$("dlno").value=x.note||"";
+    if(x.time){const[h,m]=x.time.split(":"),n=+h;$("dlth").value=String(n%12||12);$("dltm").value=m;$("dlta").value=n<12?"AM":"PM"}else{$("dlth").value="";$("dltm").value="";$("dlta").value="AM"}
+    dlEditId=b.dataset.dle;$("dlmsg").textContent="Editing “"+x.title+"”. Change what you need, then tap Save.";
+    $("dlc").scrollIntoView({behavior:"smooth",block:"center"});
+  });
+}
 const CATS=["Past questions","Lecture notes","Slides","Assignments","Textbooks","Other"];
 const mcache={};let mview=null;
 const mkey=c=>c.replace(" ","");
@@ -252,7 +301,7 @@ function renderPoster(){
     return;
   }
   const pend=roster.filter(r=>r.status==="pending");
-  const KEEP=["pc","pk","pd","pn","pb","psth","pstm","psta","penh","penm","pena","sc","mc","mk","mti","mle","mli"],saved={};
+  const KEEP=["pc","pk","pd","pn","pb","psth","pstm","psta","penh","penm","pena","sc","mc","mk","mti","mle","mli","dlc","dlk","dlti","dlde","dlth","dltm","dlta","dlno"],saved={};
   KEEP.forEach(id=>{const x=$(id);if(x)saved[id]=x.value});
   const td0=ymd(new Date()),KL={h:"Holding",c:"Cancelled",m:"Moved"};
   const posted=Object.entries(board).filter(([k])=>{const dd=k.split("_")[1];return dd&&dd>=td0}).sort((a,b)=>a[0].split("_")[1].localeCompare(b[0].split("_")[1])||a[0].localeCompare(b[0]));
@@ -275,6 +324,14 @@ ${postedCard}
 <input id="mli" placeholder="Paste the Google Drive link" inputmode="url" autocapitalize="off">
 <button class="btn" id="ma">Add material</button><div class="msg" id="mmsg"></div>
 <p class="sub">In Google Drive: open the file or folder, tap Share, set General access to “Anyone with the link”, then copy the link.</p></div>
+<div class="card"><b>Add deadline or test</b>
+<select id="dlc">${opts}</select>
+<select id="dlk">${DTYPES.map(c=>`<option>${c}</option>`).join("")}</select>
+<input id="dlti" placeholder="Title (e.g. Test 1, Assignment 2)">
+<small>Date</small><input id="dlde" type="date" min="${ymd(new Date())}">
+<small>Time (optional)</small>${tsel("dlt")}
+<input id="dlno" placeholder="Note or venue (optional)">
+<button class="btn" id="dlad">Save</button><div class="msg" id="dlmsg"></div></div>
 <div class="card"><b>Open attendance</b>
 <select id="sc">${opts}</select>
 <button class="btn" id="so">Start 3-minute session</button>
@@ -294,6 +351,20 @@ ${newCode?`<p class="sub" style="text-align:center">Show this code in class</p><
     $("pm1").textContent="Editing "+(cc?cc[0]:c)+". Change what you need, then tap Post.";
     $("pc").scrollIntoView({behavior:"smooth",block:"center"});
   });
+  $("dlad").onclick=async()=>{
+    const m=$("dlmsg"),course=$("dlc").value,type=$("dlk").value,title=$("dlti").value.trim(),due=$("dlde").value,note=$("dlno").value.trim(),time=tget("dlt");
+    if(!title||!due){m.textContent="Add a title and a date.";return}
+    if(time==="bad"){m.textContent="Pick the hour and the minute, or leave the time empty.";return}
+    const id=dlEditId||"d"+Date.now(),item={course,type,title,due,note,t:Date.now()};
+    if(time)item.time=time;
+    const upd={[id]:item},cut=ymd(addDays(-14));
+    Object.entries(dl).forEach(([k,v])=>{if(v&&v.due&&v.due<cut)upd[k]=deleteField()});
+    try{
+      try{await updateDoc(D("config/deadlines"),upd)}catch(x){await setDoc(D("config/deadlines"),{[id]:item})}
+      dl[id]=item;dlReady=true;dlEditId=null;$("dlti").value="";$("dlno").value="";
+      m.textContent="Saved.";renderStatus();
+    }catch(e){m.textContent="Couldn’t save. Check your connection."}
+  };
   $("ma").onclick=async()=>{
     const code=$("mc").value,cat=$("mk").value,title=$("mti").value.trim(),lec=$("mle").value.trim(),link=$("mli").value.trim(),m=$("mmsg");
     if(!title||!link){m.textContent="Add a title and a link.";return}
@@ -413,11 +484,13 @@ function startPoster(){
   onSnapshot(D("config/rules"),d=>{strict=d.exists()&&d.data().strict===true;renderPoster()},err);
   loadAuth().catch(()=>{});
 }
+async function startDL(){await loadDL();renderStatus()}
 
 renderStatus();
 try{
   if(String(firebaseConfig.apiKey).includes("PASTE"))throw new Error("config");
   fbApp=initializeApp(firebaseConfig);db=getFirestore(fbApp);
+  startDL();
   onSnapshot(D("config/board"),d=>{board=d.exists()?d.data():{};boardReady=true;if($("warn").textContent.startsWith("Still"))$("warn").hidden=true;renderStatus();hideSplash()},err);
 }catch(e){warn("Setup not finished: the Firebase details in firebase-config.js are missing.");hideSplash()}
 if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
