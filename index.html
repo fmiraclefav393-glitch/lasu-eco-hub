@@ -3,7 +3,7 @@
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>300L Economics Class Hub</title>
-<script>try{var n=navigator;if((n.deviceMemory&&n.deviceMemory<=2)||(n.hardwareConcurrency&&n.hardwareConcurrency<=4))document.documentElement.classList.add("lite")}catch(e){}try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<script>try{var n=navigator,L=localStorage.getItem("lite");if(L==="1"||(L===null&&((n.deviceMemory&&n.deviceMemory<=2)||(n.hardwareConcurrency&&n.hardwareConcurrency<=4))))document.documentElement.classList.add("lite")}catch(e){}try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0f6b3f">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -64,13 +64,13 @@ small{color:var(--mu)}
 @keyframes twinkle{0%{transform:scale(1)}35%{transform:scale(2.3) rotate(45deg)}100%{transform:scale(1) rotate(90deg)}}
 .auto.play .half{transform-origin:12px 12px;animation:coin .8s cubic-bezier(.5,0,.2,1)}
 @keyframes coin{to{transform:rotate(360deg)}}
-@media(prefers-reduced-motion:reduce){.sun *,.moon *,.auto *,.pop{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.sun *,.moon *,.auto *,.zap *,.pop{animation:none!important}}
 
 /* ===== Glass look ===== */
 html{background:var(--bg)}
 body{background:transparent}
 body::before{content:"";position:fixed;inset:0;z-index:-1;background:var(--bgimg);pointer-events:none}
-.deco{position:fixed;z-index:-1;pointer-events:none;opacity:var(--dec);width:170px;height:170px;filter:blur(.4px)}
+.deco{position:fixed;z-index:-1;pointer-events:none;opacity:var(--dec);width:170px;height:170px}
 .deco.d1{top:-52px;right:-56px;transform:rotate(14deg)}
 .deco.d2{bottom:-50px;left:-54px;transform:rotate(-14deg);width:150px;height:150px}
 .card,nav button,.btn.s,.glass,.warn{background:linear-gradient(118deg,var(--shine) 0%,transparent 38%),var(--gbg);border:1px solid var(--gbrd);box-shadow:var(--gsh),inset 0 1px 0 var(--ghi),inset 0 -1px 0 var(--glo);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4)}
@@ -85,6 +85,20 @@ input,select{background:var(--ibg);border:1px solid var(--gbrd);border-radius:16
 .warn{border-color:var(--mv)}
 #splash{background:var(--bgimg),var(--bg)}
 .lite .card,.lite nav button,.lite .btn.s,.lite .glass,.lite .warn{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.lite .card,.lite nav button,.lite .btn,.lite .btn.s,.lite .glass,.lite input,.lite select{box-shadow:inset 0 1px 0 var(--ghi)!important}
+.lite .deco{display:none}
+.lite .glass{background:var(--card)}
+textarea{width:100%;padding:11px;margin:5px 0;border:1px solid var(--gbrd);border-radius:16px;background:var(--ibg);color:var(--tx);font:inherit;resize:vertical;box-shadow:inset 0 1px 3px rgba(0,0,0,.18)}
+#lb{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.92);overflow:auto;padding:64px 12px 32px;touch-action:pan-x pan-y pinch-zoom}
+#lb img{width:100%;max-width:640px;border-radius:14px;display:block;margin:0 auto 10px;background:#fff}
+#lb .btn{display:block;max-width:640px;margin:0 auto 24px;text-align:center;cursor:pointer}
+#lbx{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.18);color:#fff;font-size:20px;cursor:pointer;z-index:121}
+.thumb{position:relative;width:76px;height:76px}
+.thumb img{width:76px;height:76px;object-fit:cover;border-radius:14px;border:1px solid var(--gbrd)}
+.thumb button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:var(--no);color:#fff;font-size:13px;line-height:24px;padding:0;cursor:pointer}
+.lite #splash img{filter:none;animation:none}
+.zap.play polygon{transform-origin:12px 12px;animation:zapx .6s ease-in-out}
+@keyframes zapx{40%{transform:scale(1.35) rotate(-10deg)}}
 </style></head><body>
 <svg class="deco d1" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".55" stop-color="#cfd8d3" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity=".45"/></linearGradient></defs><path d="M50 5C60 5 66 30 95 38C99 50 99 50 95 62C66 70 60 95 50 95C40 95 34 70 5 62C1 50 1 50 5 38C34 30 40 5 50 5Z" fill="url(#gs)" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/></svg>
 <svg class="deco d2" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 5C60 5 66 30 95 38C99 50 99 50 95 62C66 70 60 95 50 95C40 95 34 70 5 62C1 50 1 50 5 38C34 30 40 5 50 5Z" fill="url(#gs)" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/></svg>
@@ -94,7 +108,7 @@ input,select{background:var(--ibg);border:1px solid var(--gbrd);border-radius:16
 window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElementById("spt");if(p)p.innerHTML='Taking too long. Check your internet.<br><button style="margin-top:12px;padding:10px 20px;border:0;border-radius:10px;background:#0f6b3f;color:#fff;font:inherit;font-weight:700" onclick="location.reload()">Try again</button>'},9000);
 </script>
 <main>
-<div class="row" style="align-items:center;gap:10px"><h1 style="flex:1">300L Economics Class Hub</h1><div id="thm" style="position:relative"><button id="thb" class="glass" aria-label="Appearance" aria-haspopup="true" aria-expanded="false"></button><div id="thp" class="glass pop" role="menu" hidden><button class="opt" data-v="light" role="menuitem" aria-label="Light mode" title="Light"></button><button class="opt" data-v="dark" role="menuitem" aria-label="Dark mode" title="Dark"></button><button class="opt" data-v="auto" role="menuitem" aria-label="Phone default" title="Phone default"></button></div></div></div>
+<div class="row" style="align-items:center;gap:10px"><h1 style="flex:1">300L Economics Class Hub</h1><div id="thm" style="position:relative"><button id="thb" class="glass" aria-label="Appearance" aria-haspopup="true" aria-expanded="false"></button><div id="thp" class="glass pop" role="menu" hidden><button class="opt" data-v="light" role="menuitem" aria-label="Light mode" title="Light"></button><button class="opt" data-v="dark" role="menuitem" aria-label="Dark mode" title="Dark"></button><button class="opt" data-v="auto" role="menuitem" aria-label="Phone default" title="Phone default"></button><button class="opt" data-v="lite" role="menuitem" aria-label="Smooth mode" title="Smooth mode (faster on slower phones)"></button></div></div></div>
 <p class="sub">LASU Ojo · Class status and attendance</p>
 <div id="warn" class="warn" hidden></div>
 <nav><button data-t="st" class="on">Today</button><button data-t="at">Attendance</button><button data-t="mt">Materials</button><button data-t="dl">Deadlines</button><button data-t="po">Poster</button></nav>
@@ -112,8 +126,9 @@ window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElem
 <section id="mt" hidden></section>
 <section id="dl" hidden></section>
 <section id="po" hidden></section>
-<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 9</footer>
+<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 11</footer>
 </main>
+<div id="lb" hidden><button id="lbx" aria-label="Close">✕</button><div id="lbc"></div></div>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getFirestore,doc,collection,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,getDocs,deleteField} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
@@ -131,16 +146,26 @@ $("ac").innerHTML=opts;
   const STAR="M0-2L.6-.6 2 0 .6.6 0 2-.6.6-2 0-.6-.6z";
   const MOON=`<svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path class="crescent" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><g transform="translate(17.5 6.5) scale(1.1)"><path class="st s1" d="${STAR}"/></g><g transform="translate(21 3.5) scale(.7)"><path class="st s2" d="${STAR}"/></g><g transform="translate(14.5 3) scale(.6)"><path class="st s3" d="${STAR}"/></g></svg>`;
   const AUTO=`<svg class="auto" viewBox="0 0 24 24" aria-hidden="true"><g class="half"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" style="fill:currentColor"/></g></svg>`;
-  const ICON={light:SUN,dark:MOON,auto:AUTO};
+  const BOLT=`<svg class="zap" viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+  const ICON={light:SUN,dark:MOON,auto:AUTO,lite:BOLT};
   let cur="auto";try{const sv=localStorage.getItem("theme");if(sv==="light"||sv==="dark")cur=sv}catch(e){}
-  const paint=()=>{$("thb").innerHTML=ICON[cur];document.querySelectorAll(".opt").forEach(b=>{b.innerHTML=ICON[b.dataset.v];b.classList.toggle("on",b.dataset.v===cur)})};
+  const paint=()=>{$("thb").innerHTML=ICON[cur];document.querySelectorAll(".opt").forEach(b=>{b.innerHTML=ICON[b.dataset.v];b.classList.toggle("on",b.dataset.v==="lite"?document.documentElement.classList.contains("lite"):b.dataset.v===cur)})};
+  window.paintTheme=paint;
   const closePop=()=>{$("thp").hidden=true;$("thb").setAttribute("aria-expanded","false")};
   $("thb").onclick=e=>{e.stopPropagation();const open=$("thp").hidden;$("thp").hidden=!open;$("thb").setAttribute("aria-expanded",String(open))};
   document.addEventListener("click",e=>{if(!$("thm").contains(e.target))closePop()});
   document.addEventListener("keydown",e=>{if(e.key==="Escape")closePop()});
   document.querySelectorAll(".opt").forEach(b=>b.onclick=e=>{
     e.stopPropagation();
-    const v=b.dataset.v;cur=v;
+    const v=b.dataset.v;
+    if(v==="lite"){
+      const on=!document.documentElement.classList.contains("lite");
+      document.documentElement.classList.toggle("lite",on);
+      try{localStorage.setItem("lite",on?"1":"0")}catch(x){}
+      paint();const z=b.querySelector("svg");z.classList.remove("play");void z.getBoundingClientRect();z.classList.add("play");
+      setTimeout(closePop,850);return;
+    }
+    cur=v;
     try{v==="auto"?localStorage.removeItem("theme"):localStorage.setItem("theme",v)}catch(x){}
     const r=document.documentElement;v==="auto"?r.removeAttribute("data-theme"):r.setAttribute("data-theme",v);
     paint();
@@ -153,13 +178,26 @@ $("ac").innerHTML=opts;
 // ===== MAKE IT YOURS: change these 3 values (logo file name, title, tagline) =====
 const SPLASH={logo:"logo.svg",name:"300L Economics",tagline:"Class Hub · LASU Ojo"};
 // =================================================================================
-$("logo").src=SPLASH.logo;$("logo").onerror=()=>{$("logo").style.display="none"};
+$("logo").src=document.documentElement.classList.contains("lite")?"logo-static.svg":SPLASH.logo;$("logo").onerror=()=>{$("logo").style.display="none"};
 $("spn").textContent=SPLASH.name;$("spt").textContent=SPLASH.tagline;
 const t00=Date.now();let hid=false;
-const hideSplash=()=>{if(hid)return;hid=true;window.__ready=true;setTimeout(()=>{const e=$("splash");e.classList.add("out");setTimeout(()=>e.remove(),600)},Math.max(0,2000-(Date.now()-t00)))};
+const hideSplash=()=>{if(hid)return;hid=true;window.__ready=true;setTimeout(()=>{const e=$("splash");e.classList.add("out");setTimeout(()=>e.remove(),600)},Math.max(0,(document.documentElement.classList.contains("lite")?900:2000)-(Date.now()-t00)))};
 setTimeout(()=>{hideSplash();if(!boardReady&&db)warn("Still connecting… check your internet.")},4000);
+(()=>{
+  let pref=null;try{pref=localStorage.getItem("lite")}catch(e){}
+  if(pref!==null)return;
+  let n=0,t0=0,hid=false;
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)hid=true},{once:true});
+  const f=t=>{
+    if(!t0)t0=t;n++;
+    if(t-t0<1500){requestAnimationFrame(f);return}
+    const fps=n*1000/(t-t0);
+    if(!hid&&fps<38){document.documentElement.classList.add("lite");try{localStorage.setItem("lite","1")}catch(e){}if(typeof paintTheme==="function")paintTheme()}
+  };
+  requestAnimationFrame(f);
+})();
 const warn=t=>{$("warn").textContent=t;$("warn").hidden=false};
-let db=null,board={},boardReady=false,viewDay=0,pdate="",fbApp=null,me=null,AU=null,dl={},dlReady=false,dlAt=0,dlCourse="all",dlPast=false,dlEditId=null,sessions=[],atts=[],roster=[],pin=undefined,strict=false,isPoster=false,newCode=null,cmsg="",share="";
+let db=null,board={},boardReady=false,viewDay=0,pdate="",fbApp=null,me=null,AU=null,dl={},dlReady=false,dlAt=0,dlCourse="all",dlPast=false,dlEditId=null,dlImgs=[],imgCache={},sessions=[],atts=[],roster=[],pin=undefined,strict=false,isPoster=false,newCode=null,cmsg="",share="";
 const D=p=>doc(db,p),list=s=>s.docs.map(d=>({id:d.id,...d.data()}));
 const idOf=m=>m.replace(/[^A-Z0-9]/g,"");
 
@@ -204,6 +242,44 @@ function renderStatus(){
 }
 setInterval(renderStatus,30000);
 
+async function shrink(file){
+  const bmp=await createImageBitmap(file);
+  let max=1100,q=.72,out="";
+  for(let i=0;i<7;i++){
+    const sc=Math.min(1,max/Math.max(bmp.width,bmp.height)),w=Math.round(bmp.width*sc),h=Math.round(bmp.height*sc);
+    const c=document.createElement("canvas");c.width=w;c.height=h;
+    const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(bmp,0,0,w,h);
+    out=c.toDataURL("image/jpeg",q);
+    if(out.length<270000)break;
+    q=Math.max(.4,q-.08);max=Math.round(max*.85);
+  }
+  if(bmp.close)bmp.close();
+  return out.length<300000?out:null;
+}
+function drawThumbs(){
+  const el=$("dlthumbs");if(!el)return;
+  el.innerHTML=dlImgs.map((u,i)=>`<div class="thumb"><img src="${u}" alt="Picture ${i+1}"><button data-rm="${i}" aria-label="Remove picture">✕</button></div>`).join("");
+  el.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{dlImgs.splice(+b.dataset.rm,1);drawThumbs()});
+}
+const okImg=u=>typeof u==="string"&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(u);
+function openLB(html){$("lbc").innerHTML=html;$("lb").hidden=false;document.body.style.overflow="hidden"}
+function closeLB(){$("lb").hidden=true;document.body.style.overflow=""}
+async function showImgs(id){
+  openLB('<p class="sub" style="color:#fff;text-align:center">Loading…</p>');
+  try{
+    if(!imgCache[id]){const d=await getDoc(D("config/dlimg_"+id));imgCache[id]=d.exists()?[0,1,2].map(i=>d.data()["i"+i]).filter(okImg):[]}
+    const arr=imgCache[id];
+    if(!arr.length){openLB('<p class="sub" style="color:#fff;text-align:center">No picture found.</p>');return}
+    openLB(arr.map((u,i)=>`<img src="${u}" alt="Picture ${i+1}"><a class="btn s" data-save="${i}">Save picture ${arr.length>1?i+1:""}</a>`).join(""));
+    $("lbc").querySelectorAll("[data-save]").forEach(b=>b.onclick=async()=>{
+      const bl=await (await fetch(arr[+b.dataset.save])).blob(),a=document.createElement("a");
+      a.href=URL.createObjectURL(bl);a.download="assignment-"+(+b.dataset.save+1)+".jpg";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    });
+  }catch(e){openLB('<p class="sub" style="color:#fff;text-align:center">Couldn’t load the picture. Check your internet.</p>')}
+}
+$("lbx").onclick=closeLB;
+$("lb").onclick=e=>{if(e.target.id==="lb"||e.target.id==="lbc")closeLB()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeLB()});
 const DTYPES=["Assignment","Test","Quiz","Exam","Project","Presentation","Other"];
 const dday=due=>Math.round((new Date(due+"T12:00:00")-new Date(ymd(new Date())+"T12:00:00"))/864e5);
 const dwhen=n=>n===0?"Due today":n===1?"Tomorrow":n>1?"In "+n+" days":n===-1?"Yesterday":(-n)+" days ago";
@@ -225,7 +301,7 @@ function drawDL(){
   const el=$("dl");
   const all=dlItems().filter(x=>dlCourse==="all"||x.course===dlCourse);
   const up=all.filter(x=>dday(x.due)>=0).sort(dcmp),past=all.filter(x=>dday(x.due)<0&&dday(x.due)>=-14).sort((a,b)=>dcmp(b,a));
-  const card=x=>{const n=dday(x.due),cls=n<0?"n":n<=1?"c":n<=3?"m":"h";return `<div class="card"><div class="row"><div><b>${esc(x.title)}</b><br><small>${x.course} · ${esc(x.type)}</small></div><span class="b ${cls}" style="white-space:nowrap">${dwhen(n)}</span></div><div style="margin-top:8px"><b>${dfmt(x.due)}${x.time?" · "+f12(x.time):""}</b>${x.note?`<br>${esc(x.note)}`:""}</div>${isPoster?`<div style="margin-top:8px"><button class="b h" style="background:none;cursor:pointer" data-dle="${esc(x.id)}">Edit</button> <button class="b c" style="background:none;cursor:pointer" data-dld="${esc(x.id)}">Delete</button></div>`:""}</div>`};
+  const card=x=>{const n=dday(x.due),cls=n<0?"n":n<=1?"c":n<=3?"m":"h";return `<div class="card"><div class="row"><div><b>${esc(x.title)}</b><br><small>${x.course} · ${esc(x.type)}</small></div><span class="b ${cls}" style="white-space:nowrap">${dwhen(n)}</span></div><div style="margin-top:8px"><b>${dfmt(x.due)}${x.time?" · "+f12(x.time):""}</b>${x.note?`<br>${esc(x.note)}`:""}</div>${x.text?`<div style="margin-top:8px;white-space:pre-wrap">${esc(x.text)}</div>`:""}${(x.img||(x.link&&safeUrl(x.link)))?`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${x.img?`<button class="b h" style="background:none;cursor:pointer" data-dli="${esc(x.id)}">View picture${x.img>1?"s ("+x.img+")":""}</button>`:""}${x.link&&safeUrl(x.link)?`<a class="b h" style="text-decoration:none" href="${esc(x.link)}" target="_blank" rel="noopener">Open link</a>`:""}</div>`:""}${isPoster?`<div style="margin-top:8px"><button class="b h" style="background:none;cursor:pointer" data-dle="${esc(x.id)}">Edit</button> <button class="b c" style="background:none;cursor:pointer" data-dld="${esc(x.id)}">Delete</button></div>`:""}</div>`};
   el.innerHTML=`<select id="dlf" aria-label="Course"><option value="all">All courses</option>${COURSES.map(([c])=>`<option${c===dlCourse?" selected":""}>${c}</option>`).join("")}</select>`
    +(up.length?up.map(card).join(""):`<div class="card"><p class="sub" style="margin:0">Nothing coming up. Check back soon.</p></div>`)
    +(past.length?`<button class="btn s" id="dlp" style="margin-top:6px">${dlPast?"Hide":"Show"} past (${past.length})</button>`+(dlPast?past.map(card).join(""):""):"")
@@ -233,17 +309,20 @@ function drawDL(){
   $("dlf").onchange=()=>{dlCourse=$("dlf").value;drawDL()};
   if($("dlp"))$("dlp").onclick=()=>{dlPast=!dlPast;drawDL()};
   $("dlr").onclick=()=>renderDL(true);
+  el.querySelectorAll("[data-dli]").forEach(b=>b.onclick=()=>showImgs(b.dataset.dli));
   el.querySelectorAll("[data-dld]").forEach(b=>b.onclick=async()=>{
-    try{await updateDoc(D("config/deadlines"),{[b.dataset.dld]:deleteField()});delete dl[b.dataset.dld]}catch(e){}
+    try{const id=b.dataset.dld,had=dl[id]&&dl[id].img;await updateDoc(D("config/deadlines"),{[id]:deleteField()});if(had)deleteDoc(D("config/dlimg_"+id)).catch(()=>{});delete dl[id];delete imgCache[id]}catch(e){}
     drawDL();renderStatus();
   });
-  el.querySelectorAll("[data-dle]").forEach(b=>b.onclick=()=>{
+  el.querySelectorAll("[data-dle]").forEach(b=>b.onclick=async()=>{
     const x=dl[b.dataset.dle];if(!x||!$("dlc"))return;
     document.querySelector("nav button[data-t=po]").click();
-    $("dlc").value=x.course;$("dlk").value=x.type;$("dlti").value=x.title;$("dlde").value=x.due;$("dlno").value=x.note||"";
+    $("dlc").value=x.course;$("dlk").value=x.type;$("dlti").value=x.title;$("dlde").value=x.due;$("dlno").value=x.note||"";$("dltx").value=x.text||"";$("dllk").value=x.link||"";
     if(x.time){const[h,m]=x.time.split(":"),n=+h;$("dlth").value=String(n%12||12);$("dltm").value=m;$("dlta").value=n<12?"AM":"PM"}else{$("dlth").value="";$("dltm").value="";$("dlta").value="AM"}
     dlEditId=b.dataset.dle;$("dlmsg").textContent="Editing “"+x.title+"”. Change what you need, then tap Save.";
     $("dlc").scrollIntoView({behavior:"smooth",block:"center"});
+    dlImgs=[];drawThumbs();
+    if(x.img){try{const d=await getDoc(D("config/dlimg_"+b.dataset.dle));if(d.exists())dlImgs=[0,1,2].map(i=>d.data()["i"+i]).filter(okImg);drawThumbs()}catch(e){}}
   });
 }
 const CATS=["Past questions","Lecture notes","Slides","Assignments","Textbooks","Other"];
@@ -301,7 +380,7 @@ function renderPoster(){
     return;
   }
   const pend=roster.filter(r=>r.status==="pending");
-  const KEEP=["pc","pk","pd","pn","pb","psth","pstm","psta","penh","penm","pena","sc","mc","mk","mti","mle","mli","dlc","dlk","dlti","dlde","dlth","dltm","dlta","dlno"],saved={};
+  const KEEP=["pc","pk","pd","pn","pb","psth","pstm","psta","penh","penm","pena","sc","mc","mk","mti","mle","mli","dlc","dlk","dlti","dlde","dlth","dltm","dlta","dlno","dltx","dllk"],saved={};
   KEEP.forEach(id=>{const x=$(id);if(x)saved[id]=x.value});
   const td0=ymd(new Date()),KL={h:"Holding",c:"Cancelled",m:"Moved"};
   const posted=Object.entries(board).filter(([k])=>{const dd=k.split("_")[1];return dd&&dd>=td0}).sort((a,b)=>a[0].split("_")[1].localeCompare(b[0].split("_")[1])||a[0].localeCompare(b[0]));
@@ -331,6 +410,10 @@ ${postedCard}
 <small>Date</small><input id="dlde" type="date" min="${ymd(new Date())}">
 <small>Time (optional)</small>${tsel("dlt")}
 <input id="dlno" placeholder="Note or venue (optional)">
+<textarea id="dltx" rows="4" maxlength="2000" placeholder="Assignment question or details (optional). Type short questions here."></textarea>
+<input id="dllk" placeholder="Link, e.g. Google Drive (optional)" inputmode="url" autocapitalize="off">
+<label class="btn s" style="display:block;text-align:center;cursor:pointer;margin:5px 0">Add pictures (up to 3)<input id="dlfile" type="file" accept="image/*" multiple hidden></label>
+<div id="dlthumbs" style="display:flex;gap:10px;flex-wrap:wrap;margin:6px 0"></div>
 <button class="btn" id="dlad">Save</button><div class="msg" id="dlmsg"></div></div>
 <div class="card"><b>Open attendance</b>
 <select id="sc">${opts}</select>
@@ -351,17 +434,33 @@ ${newCode?`<p class="sub" style="text-align:center">Show this code in class</p><
     $("pm1").textContent="Editing "+(cc?cc[0]:c)+". Change what you need, then tap Post.";
     $("pc").scrollIntoView({behavior:"smooth",block:"center"});
   });
+  drawThumbs();
+  $("dlfile").onchange=async e=>{
+    const files=[...e.target.files];e.target.value="";
+    for(const f of files){
+      if(dlImgs.length>=3){$("dlmsg").textContent="Up to 3 pictures per item.";break}
+      $("dlmsg").textContent="Preparing picture…";
+      try{const d=await shrink(f);if(!d)throw 0;dlImgs.push(d)}catch(x){$("dlmsg").textContent="Couldn’t use that picture. Try another one.";return}
+    }
+    $("dlmsg").textContent="";drawThumbs();
+  };
   $("dlad").onclick=async()=>{
     const m=$("dlmsg"),course=$("dlc").value,type=$("dlk").value,title=$("dlti").value.trim(),due=$("dlde").value,note=$("dlno").value.trim(),time=tget("dlt");
     if(!title||!due){m.textContent="Add a title and a date.";return}
     if(time==="bad"){m.textContent="Pick the hour and the minute, or leave the time empty.";return}
+    const text=$("dltx").value.trim().slice(0,2000),link=$("dllk").value.trim();
+    if(link&&!safeUrl(link)){m.textContent="The link must start with https://";return}
     const id=dlEditId||"d"+Date.now(),item={course,type,title,due,note,t:Date.now()};
-    if(time)item.time=time;
+    if(time)item.time=time;if(text)item.text=text;if(link)item.link=link;
+    const hadImg=dlEditId&&dl[dlEditId]&&dl[dlEditId].img;
+    if(dlImgs.length)item.img=dlImgs.length;
     const upd={[id]:item},cut=ymd(addDays(-14));
-    Object.entries(dl).forEach(([k,v])=>{if(v&&v.due&&v.due<cut)upd[k]=deleteField()});
+    Object.entries(dl).forEach(([k,v])=>{if(v&&v.due&&v.due<cut){upd[k]=deleteField();if(v.img)deleteDoc(D("config/dlimg_"+k)).catch(()=>{})}});
     try{
+      if(dlImgs.length){const o={n:dlImgs.length};dlImgs.forEach((u,i)=>o["i"+i]=u);await setDoc(D("config/dlimg_"+id),o);imgCache[id]=[...dlImgs]}
+      else if(hadImg){await deleteDoc(D("config/dlimg_"+id));delete imgCache[id]}
       try{await updateDoc(D("config/deadlines"),upd)}catch(x){await setDoc(D("config/deadlines"),{[id]:item})}
-      dl[id]=item;dlReady=true;dlEditId=null;$("dlti").value="";$("dlno").value="";
+      dl[id]=item;dlReady=true;dlEditId=null;$("dlti").value="";$("dlno").value="";$("dltx").value="";$("dllk").value="";dlImgs=[];drawThumbs();
       m.textContent="Saved.";renderStatus();
     }catch(e){m.textContent="Couldn’t save. Check your connection."}
   };
