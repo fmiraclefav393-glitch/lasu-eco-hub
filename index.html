@@ -126,7 +126,7 @@ window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElem
 <section id="mt" hidden></section>
 <section id="dl" hidden></section>
 <section id="po" hidden></section>
-<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 11</footer>
+<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 12</footer>
 </main>
 <div id="lb" hidden><button id="lbx" aria-label="Close">✕</button><div id="lbc"></div></div>
 <script type="module">
@@ -280,6 +280,34 @@ async function showImgs(id){
 $("lbx").onclick=closeLB;
 $("lb").onclick=e=>{if(e.target.id==="lb"||e.target.id==="lbc")closeLB()};
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeLB()});
+const AIM={explain:"Explain this in simple language with a real-life example (a Nigerian one if possible). Then give me a 3-point summary.",hints:"Do not just give me the final answer. Break it into small steps, give me a hint for step 1, and ask me to try it before you show more.",quiz:"Ask me 5 practice questions on this, one at a time, and tell me whether each of my answers is right.",check:"Check my attempt below. Point out any mistakes and explain how to fix them."};
+let aiCtx=null,aiMode="explain";
+function aiPrompt(extra){
+  const c=aiCtx;
+  let p="I'm a 300-level Economics student at LASU Ojo, Nigeria.\nCourse: "+c.course+(c.courseTitle?" ("+c.courseTitle+")":"")+"\n"+c.kind+": "+c.title;
+  if(c.lec)p+="\nLecturer or topic: "+c.lec;
+  if(c.text)p+="\nQuestion:\n"+c.text.slice(0,1200);
+  if(c.note)p+="\nNote: "+c.note.slice(0,200);
+  p+="\n\n"+AIM[aiMode];
+  if(extra)p+="\n\nMy message:\n"+extra.slice(0,600);
+  p+="\n\nPlease explain in a way I can understand. I want to learn, so help me write my own answer.";
+  return p;
+}
+function askAI(ctx,mode){aiCtx=ctx;aiMode=mode;drawAI()}
+function drawAI(){
+  const c=aiCtx,keep=$("aix")?$("aix").value:"";
+  const chips=[["explain","Explain simply"],["hints","Step-by-step hints"],["quiz","Quiz me"],["check","Check my answer"]];
+  const tip=c.tip==="file"?"Tip: ChatGPT and Gemini can’t open private Drive files. Open the file, download it, and attach it inside the AI app for the best answers.":c.tip==="pic1"?"Tip: this assignment has pictures. Tap View picture, save it, and attach it inside the AI app.":"";
+  openLB(`<div class="card" style="max-width:520px;margin:0 auto"><b>Ask AI about this</b><p class="sub" style="margin:4px 0 10px">${esc(c.course)} · ${esc(c.title)}</p><div style="display:flex;gap:8px;flex-wrap:wrap">${chips.map(([k,l])=>`<button class="b ${aiMode===k?"h":"n"}" style="background:${aiMode===k?"rgba(76,196,137,.2)":"none"};cursor:pointer" data-aim="${k}">${l}</button>`).join("")}</div><textarea id="aix" rows="4" placeholder="${aiMode==="check"?"Paste your attempt here":"Your own question (optional)"}">${esc(keep)}</textarea><button class="btn" id="aigpt" style="margin:8px 0 0;max-width:none">Open ChatGPT</button><button class="btn" id="aigem" style="margin:8px 0 0;max-width:none">Open Gemini</button><p class="sub" style="margin:10px 0 0">Your prompt is copied too. If the chat box is empty, just paste it. AI can make mistakes, so check with your lecturer’s notes and write your own answer.${tip?"<br><br>"+esc(tip):""}</p></div>`);
+  $("lbc").querySelectorAll("[data-aim]").forEach(b=>b.onclick=()=>{aiMode=b.dataset.aim;drawAI()});
+  const go=url=>{
+    const p=aiPrompt($("aix").value.trim());
+    try{navigator.clipboard&&navigator.clipboard.writeText(p).catch(()=>{})}catch(e){}
+    window.open(url+encodeURIComponent(p),"_blank","noopener");
+  };
+  $("aigpt").onclick=()=>go("https://chatgpt.com/?q=");
+  $("aigem").onclick=()=>go("https://gemini.google.com/guided-learning?query=");
+}
 const DTYPES=["Assignment","Test","Quiz","Exam","Project","Presentation","Other"];
 const dday=due=>Math.round((new Date(due+"T12:00:00")-new Date(ymd(new Date())+"T12:00:00"))/864e5);
 const dwhen=n=>n===0?"Due today":n===1?"Tomorrow":n>1?"In "+n+" days":n===-1?"Yesterday":(-n)+" days ago";
@@ -301,7 +329,7 @@ function drawDL(){
   const el=$("dl");
   const all=dlItems().filter(x=>dlCourse==="all"||x.course===dlCourse);
   const up=all.filter(x=>dday(x.due)>=0).sort(dcmp),past=all.filter(x=>dday(x.due)<0&&dday(x.due)>=-14).sort((a,b)=>dcmp(b,a));
-  const card=x=>{const n=dday(x.due),cls=n<0?"n":n<=1?"c":n<=3?"m":"h";return `<div class="card"><div class="row"><div><b>${esc(x.title)}</b><br><small>${x.course} · ${esc(x.type)}</small></div><span class="b ${cls}" style="white-space:nowrap">${dwhen(n)}</span></div><div style="margin-top:8px"><b>${dfmt(x.due)}${x.time?" · "+f12(x.time):""}</b>${x.note?`<br>${esc(x.note)}`:""}</div>${x.text?`<div style="margin-top:8px;white-space:pre-wrap">${esc(x.text)}</div>`:""}${(x.img||(x.link&&safeUrl(x.link)))?`<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${x.img?`<button class="b h" style="background:none;cursor:pointer" data-dli="${esc(x.id)}">View picture${x.img>1?"s ("+x.img+")":""}</button>`:""}${x.link&&safeUrl(x.link)?`<a class="b h" style="text-decoration:none" href="${esc(x.link)}" target="_blank" rel="noopener">Open link</a>`:""}</div>`:""}${isPoster?`<div style="margin-top:8px"><button class="b h" style="background:none;cursor:pointer" data-dle="${esc(x.id)}">Edit</button> <button class="b c" style="background:none;cursor:pointer" data-dld="${esc(x.id)}">Delete</button></div>`:""}</div>`};
+  const card=x=>{const n=dday(x.due),cls=n<0?"n":n<=1?"c":n<=3?"m":"h";return `<div class="card"><div class="row"><div><b>${esc(x.title)}</b><br><small>${x.course} · ${esc(x.type)}</small></div><span class="b ${cls}" style="white-space:nowrap">${dwhen(n)}</span></div><div style="margin-top:8px"><b>${dfmt(x.due)}${x.time?" · "+f12(x.time):""}</b>${x.note?`<br>${esc(x.note)}`:""}</div>${x.text?`<div style="margin-top:8px;white-space:pre-wrap">${esc(x.text)}</div>`:""}<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${x.img?`<button class="b h" style="background:none;cursor:pointer" data-dli="${esc(x.id)}">View picture${x.img>1?"s ("+x.img+")":""}</button>`:""}${x.link&&safeUrl(x.link)?`<a class="b h" style="text-decoration:none" href="${esc(x.link)}" target="_blank" rel="noopener">Open link</a>`:""}<button class="b h" style="background:none;cursor:pointer" data-ai="${esc(x.id)}">Ask AI</button></div>${isPoster?`<div style="margin-top:8px"><button class="b h" style="background:none;cursor:pointer" data-dle="${esc(x.id)}">Edit</button> <button class="b c" style="background:none;cursor:pointer" data-dld="${esc(x.id)}">Delete</button></div>`:""}</div>`};
   el.innerHTML=`<select id="dlf" aria-label="Course"><option value="all">All courses</option>${COURSES.map(([c])=>`<option${c===dlCourse?" selected":""}>${c}</option>`).join("")}</select>`
    +(up.length?up.map(card).join(""):`<div class="card"><p class="sub" style="margin:0">Nothing coming up. Check back soon.</p></div>`)
    +(past.length?`<button class="btn s" id="dlp" style="margin-top:6px">${dlPast?"Hide":"Show"} past (${past.length})</button>`+(dlPast?past.map(card).join(""):""):"")
@@ -309,6 +337,10 @@ function drawDL(){
   $("dlf").onchange=()=>{dlCourse=$("dlf").value;drawDL()};
   if($("dlp"))$("dlp").onclick=()=>{dlPast=!dlPast;drawDL()};
   $("dlr").onclick=()=>renderDL(true);
+  el.querySelectorAll("[data-ai]").forEach(b=>b.onclick=()=>{
+    const x=dl[b.dataset.ai];if(!x)return;const cc=COURSES.find(c=>c[0]===x.course);
+    askAI({course:x.course,courseTitle:cc?cc[1]:"",kind:x.type,title:x.title,text:x.text||"",note:x.note||"",tip:x.img?"pic1":""},/^(Test|Quiz|Exam)$/.test(x.type)?"quiz":"hints");
+  });
   el.querySelectorAll("[data-dli]").forEach(b=>b.onclick=()=>showImgs(b.dataset.dli));
   el.querySelectorAll("[data-dld]").forEach(b=>b.onclick=async()=>{
     try{const id=b.dataset.dld,had=dl[id]&&dl[id].img;await updateDoc(D("config/deadlines"),{[id]:deleteField()});if(had)deleteDoc(D("config/dlimg_"+id)).catch(()=>{});delete dl[id];delete imgCache[id]}catch(e){}
@@ -352,12 +384,16 @@ async function renderMat(){
   if(!items.length)html+=`<div class="card"><p class="sub" style="margin:0">Nothing added yet. Check back soon.</p></div>`;
   CATS.forEach(cat=>{
     const g=items.filter(x=>x.cat===cat);if(!g.length)return;
-    html+=`<p style="margin:14px 0 4px"><b>${cat}</b></p>`+g.map(x=>`<div class="card"><div class="row"><div><b>${esc(x.title)}</b>${x.lec?`<br><small>${esc(x.lec)}</small>`:""}</div><span style="white-space:nowrap"><a class="b h" style="text-decoration:none" href="${esc(x.link)}" target="_blank" rel="noopener">Open</a>${isPoster?` <button class="b c" style="background:none;cursor:pointer" data-md="${esc(x.id)}">Delete</button>`:""}</span></div></div>`).join("");
+    html+=`<p style="margin:14px 0 4px"><b>${cat}</b></p>`+g.map(x=>`<div class="card"><div class="row"><div><b>${esc(x.title)}</b>${x.lec?`<br><small>${esc(x.lec)}</small>`:""}</div><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><a class="b h" style="text-decoration:none" href="${esc(x.link)}" target="_blank" rel="noopener">Open</a><button class="b h" style="background:none;cursor:pointer" data-aim2="${esc(x.id)}">Ask AI</button>${isPoster?` <button class="b c" style="background:none;cursor:pointer" data-md="${esc(x.id)}">Delete</button>`:""}</span></div></div>`).join("");
   });
   html+=`<button class="btn s" id="mr" style="margin-top:12px">Refresh</button>`;
   el.innerHTML=html;
   $("mb").onclick=()=>{mview=null;renderMat()};
   $("mr").onclick=()=>{delete mcache[mview];renderMat()};
+  el.querySelectorAll("[data-aim2]").forEach(b=>b.onclick=()=>{
+    const x=items.find(i=>i.id===b.dataset.aim2);if(!x)return;const cc=COURSES.find(c=>c[0]===mview);
+    askAI({course:mview,courseTitle:cc?cc[1]:"",kind:x.cat,title:x.title,lec:x.lec||"",text:"",note:"",tip:"file"},/past/i.test(x.cat)?"hints":"explain");
+  });
   el.querySelectorAll("[data-md]").forEach(b=>b.onclick=async()=>{
     try{await updateDoc(D("config/mat_"+mkey(mview)),{[b.dataset.md]:deleteField()});delete mcache[mview][b.dataset.md]}catch(e){}
     renderMat();
