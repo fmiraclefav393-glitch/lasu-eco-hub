@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<!-- © 2026 MIRAI Industries (David Favour Miracle). All rights reserved. Copying, reusing or redistributing this code without written permission is not allowed. -->
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>300L Economics Class Hub</title>
+<script>try{var n=navigator,L=localStorage.getItem("lite");if(L==="1"||(L===null&&((n.deviceMemory&&n.deviceMemory<=2)||(n.hardwareConcurrency&&n.hardwareConcurrency<=4))))document.documentElement.classList.add("lite")}catch(e){}try{var t=localStorage.getItem("theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f6b3f">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root{--bg:#eef3ef;--card:#fff;--tx:#14201a;--mu:#5d6d63;--ac:#0f6b3f;--bd:#dde3dd;--ok:#0f6b3f;--no:#b3261e;--mv:#9a6700;--gbg:linear-gradient(135deg,rgba(255,255,255,.88),rgba(255,255,255,.55));--gbrd:rgba(255,255,255,.95);--ghi:rgba(255,255,255,1);--glo:rgba(20,60,40,.06);--gsh:0 10px 26px rgba(25,70,50,.14);--ibg:rgba(255,255,255,.78);--shine:rgba(255,255,255,.55);--dec:.4;--bgimg:radial-gradient(60% 38% at 88% 6%,rgba(15,107,63,.22),transparent 72%),radial-gradient(48% 32% at 6% 34%,rgba(223,182,84,.25),transparent 72%),radial-gradient(62% 42% at 82% 92%,rgba(60,170,120,.2),transparent 72%),linear-gradient(125deg,transparent 38%,rgba(255,255,255,.5) 44%,transparent 50%),linear-gradient(180deg,#f3f7f4,#e6eee9);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#090e0b;--card:#141c17;--tx:#eef3ef;--mu:#9fb0a5;--ac:#4cc489;--bd:#2c382f;--ok:#4cc489;--no:#ff8a80;--mv:#e0b34a;--gbg:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.035));--gbrd:rgba(255,255,255,.2);--ghi:rgba(255,255,255,.38);--glo:rgba(255,255,255,.06);--gsh:0 10px 30px rgba(0,0,0,.45);--ibg:rgba(0,0,0,.32);--shine:rgba(255,255,255,.14);--dec:.6;--bgimg:radial-gradient(60% 38% at 88% 6%,rgba(76,196,137,.26),transparent 72%),radial-gradient(48% 32% at 6% 34%,rgba(223,182,84,.13),transparent 72%),radial-gradient(62% 42% at 82% 92%,rgba(76,196,137,.16),transparent 72%),linear-gradient(125deg,transparent 38%,rgba(255,255,255,.055) 44%,transparent 50%),linear-gradient(55deg,transparent 58%,rgba(255,255,255,.04) 63%,transparent 69%),linear-gradient(180deg,#080c09,#0d1511);color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#090e0b;--card:#141c17;--tx:#eef3ef;--mu:#9fb0a5;--ac:#4cc489;--bd:#2c382f;--ok:#4cc489;--no:#ff8a80;--mv:#e0b34a;--gbg:linear-gradient(135deg,rgba(255,255,255,.10),rgba(255,255,255,.035));--gbrd:rgba(255,255,255,.2);--ghi:rgba(255,255,255,.38);--glo:rgba(255,255,255,.06);--gsh:0 10px 30px rgba(0,0,0,.45);--ibg:rgba(0,0,0,.32);--shine:rgba(255,255,255,.14);--dec:.6;--bgimg:radial-gradient(60% 38% at 88% 6%,rgba(76,196,137,.26),transparent 72%),radial-gradient(48% 32% at 6% 34%,rgba(223,182,84,.13),transparent 72%),radial-gradient(62% 42% at 82% 92%,rgba(76,196,137,.16),transparent 72%),linear-gradient(125deg,transparent 38%,rgba(255,255,255,.055) 44%,transparent 50%),linear-gradient(55deg,transparent 58%,rgba(255,255,255,.04) 63%,transparent 69%),linear-gradient(180deg,#080c09,#0d1511);color-scheme:dark}
+:root[data-theme="light"]{--bg:#eef3ef;--card:#fff;--tx:#14201a;--mu:#5d6d63;--ac:#0f6b3f;--bd:#dde3dd;--ok:#0f6b3f;--no:#b3261e;--mv:#9a6700;--gbg:linear-gradient(135deg,rgba(255,255,255,.88),rgba(255,255,255,.55));--gbrd:rgba(255,255,255,.95);--ghi:rgba(255,255,255,1);--glo:rgba(20,60,40,.06);--gsh:0 10px 26px rgba(25,70,50,.14);--ibg:rgba(255,255,255,.78);--shine:rgba(255,255,255,.55);--dec:.4;--bgimg:radial-gradient(60% 38% at 88% 6%,rgba(15,107,63,.22),transparent 72%),radial-gradient(48% 32% at 6% 34%,rgba(223,182,84,.25),transparent 72%),radial-gradient(62% 42% at 82% 92%,rgba(60,170,120,.2),transparent 72%),linear-gradient(125deg,transparent 38%,rgba(255,255,255,.5) 44%,transparent 50%),linear-gradient(180deg,#f3f7f4,#e6eee9);color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:560px;margin:0 auto;padding:16px}
+h1{font-size:20px;margin:4px 0}
+.sub{color:var(--mu);font-size:14px;margin:0 0 12px}
+nav{display:flex;gap:6px;margin:12px -2px;padding:2px 2px 10px;overflow-x:auto;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:1 0 auto;white-space:nowrap;padding:10px 16px;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;font:inherit;font-size:14px;font-weight:600}
+nav button.on{background:var(--ac);color:var(--bg);border-color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px;margin:10px 0}
+.row{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.b{font-size:12px;font-weight:700;padding:3px 8px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.h{color:var(--ok)}.c{color:var(--no)}.m{color:var(--mv)}.n{color:var(--mu)}
+input,select,.btn{width:100%;padding:11px;margin:5px 0;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font:inherit}
+.btn{background:var(--ac);color:var(--bg);font-weight:700;border:0;cursor:pointer}
+.btn.s{background:transparent;color:var(--ac);border:1px solid var(--ac)}
+.code{font-size:34px;font-weight:800;letter-spacing:6px;text-align:center;color:var(--ac)}
+.msg{font-size:14px;margin:6px 0;min-height:18px}
+.warn{background:var(--card);border:1px solid var(--mv);color:var(--mv);padding:10px;border-radius:10px;font-size:14px}
+small{color:var(--mu)}
+[hidden]{display:none!important}
+#splash{position:fixed;inset:0;z-index:99;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--bg);transition:opacity .5s}
+#splash.out{opacity:0;pointer-events:none}
+#splash img{width:150px;height:150px;filter:drop-shadow(0 14px 26px rgba(17,87,52,.28));animation:pop .45s ease-out both}
+#splash h2{margin:6px 0 0;font-size:22px;animation:rise .6s .3s both}
+#splash p{margin:0;color:var(--mu);font-size:14px;animation:rise .6s .5s both}
+.bar{width:120px;height:4px;border-radius:9px;background:var(--bd);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;width:40%;background:var(--ac);animation:slide 1.1s ease-in-out infinite}
+@keyframes pop{from{transform:scale(.3);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes pulse{50%{transform:scale(1.06)}}
+@keyframes rise{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+@keyframes slide{0%{margin-left:-40%}100%{margin-left:100%}}
+@media(prefers-reduced-motion:reduce){#splash *{animation:none!important}}
+.glass{background:rgba(127,127,127,.16);background:color-mix(in srgb,var(--card) 62%,transparent);-webkit-backdrop-filter:blur(12px) saturate(1.5);backdrop-filter:blur(12px) saturate(1.5);border:1px solid rgba(127,127,127,.3);box-shadow:0 6px 20px rgba(0,0,0,.16)}
+#thb{width:42px;height:42px;padding:0;border-radius:14px;display:flex;align-items:center;justify-content:center;color:var(--tx);cursor:pointer}
+#thb svg,.opt svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;overflow:visible}
+.pop{position:absolute;right:0;top:50px;z-index:30;display:flex;gap:6px;padding:6px;border-radius:18px;transform-origin:top right;animation:popin .18s ease-out}
+.opt{width:44px;height:44px;padding:0;border-radius:13px;border:1px solid transparent;background:transparent;color:var(--tx);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.opt.on{background:rgba(127,127,127,.22);border-color:var(--ac);color:var(--ac)}
+@keyframes popin{from{opacity:0;transform:scale(.9) translateY(-4px)}to{opacity:1;transform:none}}
+.sun.play .ray{animation:shoot .8s ease-in-out}
+@keyframes shoot{0%{transform:translate(0,0);opacity:1}38%{transform:translate(calc(var(--dx)*5px),calc(var(--dy)*5px));opacity:0}39%{transform:translate(calc(var(--dx)*-5px),calc(var(--dy)*-5px));opacity:0}100%{transform:translate(0,0);opacity:1}}
+.sun.play .core{transform-origin:12px 12px;animation:beat .8s ease-in-out}
+@keyframes beat{40%{transform:scale(1.2)}100%{transform:scale(1)}}
+.moon .st{fill:currentColor;stroke:none;transform-origin:0 0}
+.moon.play .crescent{transform-origin:12px 12px;animation:rock .8s ease-in-out}
+@keyframes rock{0%{transform:rotate(0)}30%{transform:rotate(-18deg)}65%{transform:rotate(10deg)}100%{transform:rotate(0)}}
+.moon.play .st{animation:twinkle .8s ease-in-out both}
+.moon.play .s2{animation-delay:.12s}.moon.play .s3{animation-delay:.24s}
+@keyframes twinkle{0%{transform:scale(1)}35%{transform:scale(2.3) rotate(45deg)}100%{transform:scale(1) rotate(90deg)}}
+.auto.play .half{transform-origin:12px 12px;animation:coin .8s cubic-bezier(.5,0,.2,1)}
+@keyframes coin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.sun *,.moon *,.auto *,.zap *,.pop{animation:none!important}}
+
+/* ===== Glass look ===== */
+html{background:var(--bg)}
+body{background:transparent}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:var(--bgimg);pointer-events:none}
+.deco{position:fixed;z-index:-1;pointer-events:none;opacity:var(--dec);width:170px;height:170px}
+.deco.d1{top:-52px;right:-56px;transform:rotate(14deg)}
+.deco.d2{bottom:-50px;left:-54px;transform:rotate(-14deg);width:150px;height:150px}
+.card,nav button,.btn.s,.glass,.warn{background:linear-gradient(118deg,var(--shine) 0%,transparent 38%),var(--gbg);border:1px solid var(--gbrd);box-shadow:var(--gsh),inset 0 1px 0 var(--ghi),inset 0 -1px 0 var(--glo);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4)}
+.card{border-radius:22px}
+nav button{border-radius:999px}
+nav button.on{background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 55%),var(--ac);border-color:rgba(255,255,255,.4);box-shadow:0 8px 22px rgba(15,107,63,.38),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn{border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,0) 55%),var(--ac);border:1px solid rgba(255,255,255,.4);box-shadow:0 8px 22px rgba(15,107,63,.36),inset 0 1px 0 rgba(255,255,255,.5)}
+.btn.s{color:var(--ac);background:linear-gradient(118deg,var(--shine) 0%,transparent 38%),var(--gbg);border:1px solid var(--gbrd);box-shadow:var(--gsh),inset 0 1px 0 var(--ghi),inset 0 -1px 0 var(--glo)}
+input,select{background:var(--ibg);border:1px solid var(--gbrd);border-radius:16px;box-shadow:inset 0 1px 3px rgba(0,0,0,.18)}
+.glass{border-radius:14px}
+.pop.glass{border-radius:18px}
+.warn{border-color:var(--mv)}
+#splash{background:var(--bgimg),var(--bg)}
+.lite .card,.lite nav button,.lite .btn.s,.lite .glass,.lite .warn{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.lite .card,.lite nav button,.lite .btn,.lite .btn.s,.lite .glass,.lite input,.lite select{box-shadow:inset 0 1px 0 var(--ghi)!important}
+.lite .deco{display:none}
+.lite .glass{background:var(--card)}
+textarea{width:100%;padding:11px;margin:5px 0;border:1px solid var(--gbrd);border-radius:16px;background:var(--ibg);color:var(--tx);font:inherit;resize:vertical;box-shadow:inset 0 1px 3px rgba(0,0,0,.18)}
+#lb{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.92);overflow:auto;padding:64px 12px 32px;touch-action:pan-x pan-y pinch-zoom}
+#lb img{width:100%;max-width:640px;border-radius:14px;display:block;margin:0 auto 10px;background:#fff}
+#lb .btn{display:block;max-width:640px;margin:0 auto 24px;text-align:center;cursor:pointer}
+#lbx{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);right:14px;width:46px;height:46px;border-radius:50%;border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.18);color:#fff;font-size:20px;cursor:pointer;z-index:121}
+.thumb{position:relative;width:76px;height:76px}
+.thumb img{width:76px;height:76px;object-fit:cover;border-radius:14px;border:1px solid var(--gbrd)}
+.thumb button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:0;background:var(--no);color:#fff;font-size:13px;line-height:24px;padding:0;cursor:pointer}
+.lite #splash img{filter:none;animation:none}
+.zap.play polygon{transform-origin:12px 12px;animation:zapx .6s ease-in-out}
+@keyframes zapx{40%{transform:scale(1.35) rotate(-10deg)}}
+
+/* Version 14: palette themes and attendance confirmation */
+#palp{max-height:75vh;overflow:auto}#palpresets button{border:1px solid var(--bd);border-radius:10px;padding:9px;background:var(--card);color:var(--tx);font:inherit;font-size:13px;text-align:left;cursor:pointer}#palpresets button:before{content:"";display:inline-block;width:11px;height:11px;border-radius:50%;background:var(--swatch);margin-right:7px;vertical-align:-1px;box-shadow:0 0 0 2px color-mix(in srgb,var(--swatch) 20%,transparent)}#palpresets button.active{outline:2px solid var(--ac);outline-offset:1px}
+#attendanceSuccess{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:18px;overflow:auto}#attendanceSuccess[hidden]{display:none!important}.success-backdrop{position:absolute;inset:0;background:rgba(5,18,12,.72);backdrop-filter:blur(12px);animation:successFade .25s ease-out}.success-card{position:relative;width:min(440px,100%);max-height:calc(100dvh - 36px);overflow:auto;padding:25px 20px 20px;border:1px solid var(--gbrd);border-radius:28px;background:var(--card);color:var(--tx);box-shadow:0 24px 90px rgba(0,0,0,.35);text-align:center;animation:successRise .55s cubic-bezier(.2,.8,.2,1) both}.success-check{width:76px;height:76px;margin:0 auto 12px;border-radius:50%;display:grid;place-items:center;background:color-mix(in srgb,var(--ac) 14%,var(--card));box-shadow:0 0 0 9px color-mix(in srgb,var(--ac) 7%,transparent),0 0 35px color-mix(in srgb,var(--ac) 25%,transparent)}.success-check svg{width:48px;height:48px;fill:none;stroke:var(--ac);stroke-width:4;stroke-linecap:round;stroke-linejoin:round}.success-check path{stroke-dasharray:50;stroke-dashoffset:50;animation:drawCheck .55s .2s ease-out forwards}.success-kicker{font-size:10px;font-weight:800;letter-spacing:2px;color:var(--ac);margin:12px 0 4px}.success-card h2{font-size:25px;margin:0}.success-course{color:var(--mu);margin:4px 0 17px}.success-receipt{text-align:left;border:1px dashed var(--bd);border-radius:16px;padding:13px;margin:0 0 14px;background:color-mix(in srgb,var(--bg) 72%,transparent)}.receipt-head{display:flex;justify-content:space-between;gap:8px;padding-bottom:10px;border-bottom:1px dashed var(--bd);font-size:11px;font-weight:800;letter-spacing:1px}.receipt-head span:last-child{color:var(--ac)}.receipt-row{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid color-mix(in srgb,var(--bd) 60%,transparent);font-size:12px}.receipt-row span:first-child{color:var(--mu)}.receipt-row strong{text-align:right;max-width:65%;overflow-wrap:anywhere}.receipt-foot{text-align:center;color:var(--mu);font-size:10px;padding-top:10px}.success-burst{position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 50% 13%,color-mix(in srgb,var(--ac) 18%,transparent),transparent 38%);animation:burstGlow 1.2s ease-out both}@keyframes successFade{from{opacity:0}to{opacity:1}}@keyframes successRise{from{opacity:0;transform:translateY(28px) scale(.96)}to{opacity:1;transform:none}}@keyframes drawCheck{to{stroke-dashoffset:0}}@keyframes burstGlow{0%{opacity:0;transform:scale(.7)}45%{opacity:1}100%{opacity:.55;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.success-backdrop,.success-card,.success-check path,.success-burst{animation:none!important}.success-check path{stroke-dashoffset:0}}
+html.lite .success-backdrop{backdrop-filter:none}html.lite .success-card{animation:none;box-shadow:0 8px 28px rgba(0,0,0,.25)}html.lite .success-burst{display:none}
+</style></head><body>
+<svg class="deco d1" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".55" stop-color="#cfd8d3" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity=".45"/></linearGradient></defs><path d="M50 5C60 5 66 30 95 38C99 50 99 50 95 62C66 70 60 95 50 95C40 95 34 70 5 62C1 50 1 50 5 38C34 30 40 5 50 5Z" fill="url(#gs)" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/></svg>
+<svg class="deco d2" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 5C60 5 66 30 95 38C99 50 99 50 95 62C66 70 60 95 50 95C40 95 34 70 5 62C1 50 1 50 5 38C34 30 40 5 50 5Z" fill="url(#gs)" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/></svg>
+<div id="attendanceSuccess" hidden role="dialog" aria-modal="true" aria-labelledby="successTitle"><div class="success-backdrop"></div><div class="success-card"><div class="success-burst" aria-hidden="true"></div><div class="success-check" aria-hidden="true"><svg viewBox="0 0 52 52"><path d="M13 27l9 9 18-20"/></svg></div><p class="success-kicker">ATTENDANCE CONFIRMED</p><h2 id="successTitle">You’re marked present!</h2><p class="success-course" id="successCourse"></p><div class="success-receipt"><div class="receipt-head"><span>CLASS HUB</span><span id="receiptStatus">PRESENT</span></div><div id="receiptRows"></div><div class="receipt-foot">Keep this confirmation for your records.</div></div><button class="btn" id="successClose">Done</button></div></div><div id="splash"><img id="logo" alt=""><h2 id="spn"></h2><p id="spt"></p><div class="bar"><i></i></div></div>
+<script>
+// If the app can't load (bad network), show a message and a retry button instead of loading forever.
+window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElementById("spt");if(p)p.innerHTML='Taking too long. Check your internet.<br><button style="margin-top:12px;padding:10px 20px;border:0;border-radius:10px;background:#0f6b3f;color:#fff;font:inherit;font-weight:700" onclick="location.reload()">Try again</button>'},9000);
+</script>
+<main>
+<div class="row" style="align-items:center;gap:10px"><h1 style="flex:1">300L Economics Class Hub</h1><div id="thm" style="position:relative"><button id="thb" class="glass" aria-label="Appearance" aria-haspopup="true" aria-expanded="false"></button><div id="thp" class="glass pop" role="menu" hidden><button class="opt" data-v="light" role="menuitem" aria-label="Light mode" title="Light"></button><button class="opt" data-v="dark" role="menuitem" aria-label="Dark mode" title="Dark"></button><button class="opt" data-v="auto" role="menuitem" aria-label="Phone default" title="Phone default"></button><button class="opt" data-v="lite" role="menuitem" aria-label="Smooth mode" title="Smooth mode (faster on slower phones)"></button></div></div><div style="position:relative"><button id="palb" class="glass" aria-label="Colour themes" title="Colour themes" style="width:42px;height:42px;border-radius:14px;color:var(--tx);font-size:20px">✦</button><div id="palp" class="glass" hidden style="position:absolute;right:0;top:50px;z-index:35;width:min(290px,calc(100vw - 40px));padding:14px;border-radius:18px"><b>Choose your theme</b><div id="palpresets" style="display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin:10px 0"></div><div style="border-top:1px solid var(--bd);padding-top:10px"><b style="font-size:14px">Create your own</b><label class="sub" style="display:block;margin:6px 0 2px">Primary colour</label><input id="palprimary" type="color" value="#0f6b3f" style="height:42px;padding:4px"><label class="sub" style="display:block;margin:6px 0 2px">Accent colour</label><input id="palaccent" type="color" value="#d6ad55" style="height:42px;padding:4px"><button class="btn s" id="palsave">Save custom theme</button><button class="btn s" id="palreset">Restore Emerald</button><p class="sub" id="palmsg" style="margin:5px 0 0">Saved on this device only.</p></div></div></div></div>
+<p class="sub">LASU Ojo · Class status and attendance</p>
+<div id="warn" class="warn" hidden></div>
+<nav><button data-t="st" class="on">Today</button><button data-t="at">Attendance</button><button data-t="mt">Materials</button><button data-t="dl">Deadlines</button><button data-t="po">Poster</button></nav>
+<section id="st"></section>
+<section id="at" hidden>
+<div class="card"><b>Sign attendance</b>
+<select id="ac"></select>
+<input id="an" placeholder="Full name" autocomplete="name">
+<input id="am" placeholder="Matric number" autocapitalize="characters">
+<input id="ak" placeholder="Class code from lecturer" inputmode="numeric" maxlength="4">
+<button class="btn" id="as">Mark me present</button>
+<div class="msg" id="amsg"></div>
+<p class="sub" style="margin:8px 0 0">If your lecturer turns on the location check, the app asks for your location once, when you tap Mark me present. Only your distance from the venue is saved, not where you are.</p></div>
+<div class="card"><b>Register (one time)</b><p class="sub">Add your name and matric number. A course rep will approve it.</p><input id="rn" placeholder="Full name"><input id="rm" placeholder="Matric number" autocapitalize="characters"><button class="btn s" id="rs">Register</button><div class="msg" id="rmsg"></div></div>
+</section>
+<section id="mt" hidden></section>
+<section id="dl" hidden></section>
+<section id="po" hidden></section>
+<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 14</footer>
+</main>
+<div id="lb" hidden><button id="lbx" aria-label="Close">✕</button><div id="lbc"></div></div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import {getFirestore,doc,collection,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,getDocs,deleteField} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {firebaseConfig} from "./firebase-config.js";
+
+const COURSES=[["ECO 301","Intermediate Microeconomics 1"],["ECO 331","Intermediate Macroeconomics 1"],["ECO 305","History of Economic Thought"],["ECO 307","Project Evaluation"],["SSC 301","Innovation in Social Science"],["ECO 311","Mathematics for Economist III"],["ECO 317","Environmental Economics"],["ECO 319","Statistics for Economists II"],["ECO 337","International Trade"],["ECO 303","Applied Monetary Economics"]];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const tm=t=>new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit",hour12:true});
+const t0=new Date().setHours(0,0,0,0);
+const opts=COURSES.map(c=>`<option value="${c[0]}">${c[0]} · ${c[1]}</option>`).join("");
+$("ac").innerHTML=opts;
+{
+  const SUN=`<svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle class="core" cx="12" cy="12" r="4"/>${[0,1,2,3,4,5,6,7].map(k=>{const a=k*Math.PI/4,c=Math.cos(a),d=Math.sin(a);return `<line class="ray" style="--dx:${c.toFixed(2)};--dy:${d.toFixed(2)}" x1="${(12+7*c).toFixed(2)}" y1="${(12+7*d).toFixed(2)}" x2="${(12+9.6*c).toFixed(2)}" y2="${(12+9.6*d).toFixed(2)}"/>`}).join("")}</svg>`;
+  const STAR="M0-2L.6-.6 2 0 .6.6 0 2-.6.6-2 0-.6-.6z";
+  const MOON=`<svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path class="crescent" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/><g transform="translate(17.5 6.5) scale(1.1)"><path class="st s1" d="${STAR}"/></g><g transform="translate(21 3.5) scale(.7)"><path class="st s2" d="${STAR}"/></g><g transform="translate(14.5 3) scale(.6)"><path class="st s3" d="${STAR}"/></g></svg>`;
+  const AUTO=`<svg class="auto" viewBox="0 0 24 24" aria-hidden="true"><g class="half"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" style="fill:currentColor"/></g></svg>`;
+  const BOLT=`<svg class="zap" viewBox="0 0 24 24" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`;
+  const ICON={light:SUN,dark:MOON,auto:AUTO,lite:BOLT};
+  let cur="auto";try{const sv=localStorage.getItem("theme");if(sv==="light"||sv==="dark")cur=sv}catch(e){}
+  const paint=()=>{$("thb").innerHTML=ICON[cur];document.querySelectorAll(".opt").forEach(b=>{b.innerHTML=ICON[b.dataset.v];b.classList.toggle("on",b.dataset.v==="lite"?document.documentElement.classList.contains("lite"):b.dataset.v===cur)})};
+  window.paintTheme=paint;
+  const closePop=()=>{$("thp").hidden=true;$("thb").setAttribute("aria-expanded","false")};
+  $("thb").onclick=e=>{e.stopPropagation();const open=$("thp").hidden;$("thp").hidden=!open;$("thb").setAttribute("aria-expanded",String(open))};
+  document.addEventListener("click",e=>{if(!$("thm").contains(e.target))closePop()});
+  document.addEventListener("keydown",e=>{if(e.key==="Escape")closePop()});
+  document.querySelectorAll(".opt").forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    const v=b.dataset.v;
+    if(v==="lite"){
+      const on=!document.documentElement.classList.contains("lite");
+      document.documentElement.classList.toggle("lite",on);
+      try{localStorage.setItem("lite",on?"1":"0")}catch(x){}
+      paint();const z=b.querySelector("svg");z.classList.remove("play");void z.getBoundingClientRect();z.classList.add("play");
+      setTimeout(closePop,850);return;
+    }
+    cur=v;
+    try{v==="auto"?localStorage.removeItem("theme"):localStorage.setItem("theme",v)}catch(x){}
+    const r=document.documentElement;v==="auto"?r.removeAttribute("data-theme"):r.setAttribute("data-theme",v);
+    paint();
+    const svg=b.querySelector("svg");svg.classList.remove("play");void svg.getBoundingClientRect();svg.classList.add("play");
+    setTimeout(closePop,850);
+  });
+  paint();
+}
+
+// ===== Custom colour palettes (stored locally; no Firebase reads) =====
+(()=>{
+ const presets={Emerald:{p:"#0f6b3f",a:"#d6ad55"},Rose:{p:"#b84f72",a:"#d99a9a"},Lavender:{p:"#7956b3",a:"#b9a2e8"},Ocean:{p:"#1676a5",a:"#55c5d8"},Champagne:{p:"#98743c",a:"#d8bd82"}};
+ const root=document.documentElement,btn=$("palb"),panel=$("palp"),grid=$("palpresets"),primary=$("palprimary"),accent=$("palaccent"),msg=$("palmsg");
+ const apply=(p,a,name)=>{root.style.setProperty("--ac",p);root.style.setProperty("--ok",p);root.style.setProperty("--palette-accent",a);root.style.setProperty("--bgimg",`radial-gradient(60% 38% at 88% 6%,${p}30,transparent 72%),radial-gradient(48% 32% at 6% 34%,${a}35,transparent 72%),radial-gradient(62% 42% at 82% 92%,${p}22,transparent 72%),linear-gradient(180deg,var(--bg),var(--bg))`);primary.value=p;accent.value=a;try{localStorage.setItem("classhub-palette",JSON.stringify({p,a,name}))}catch(e){}grid.querySelectorAll("button").forEach(b=>b.classList.toggle("active",b.dataset.name===name));};
+ Object.entries(presets).forEach(([name,v])=>{const b=document.createElement("button");b.type="button";b.textContent=name;b.dataset.name=name;b.style.setProperty("--swatch",v.p);b.onclick=()=>{apply(v.p,v.a,name);msg.textContent=name+" theme applied."};grid.appendChild(b)});
+ let saved=null;try{saved=JSON.parse(localStorage.getItem("classhub-palette")||"null")}catch(e){}if(saved&&/^#[0-9a-f]{6}$/i.test(saved.p||"")&&/^#[0-9a-f]{6}$/i.test(saved.a||""))apply(saved.p,saved.a,saved.name||"Custom");
+ btn.onclick=e=>{e.stopPropagation();panel.hidden=!panel.hidden};panel.onclick=e=>e.stopPropagation();document.addEventListener("click",e=>{if(!panel.contains(e.target)&&e.target!==btn)panel.hidden=true});
+ $("palsave").onclick=()=>{apply(primary.value,accent.value,"Custom");msg.textContent="Your custom theme is saved on this device."};
+ $("palreset").onclick=()=>{apply(presets.Emerald.p,presets.Emerald.a,"Emerald");msg.textContent="Restored the Emerald theme."};
+})();
+// ====================================================================
+
+// ===== MAKE IT YOURS: change these 3 values (logo file name, title, tagline) =====
+const SPLASH={logo:"logo.svg",name:"300L Economics",tagline:"Class Hub · LASU Ojo"};
+// =================================================================================
+$("logo").src=document.documentElement.classList.contains("lite")?"logo-static.svg":SPLASH.logo;$("logo").onerror=()=>{$("logo").style.display="none"};
+$("spn").textContent=SPLASH.name;$("spt").textContent=SPLASH.tagline;
+const t00=Date.now();let hid=false;
+const hideSplash=()=>{if(hid)return;hid=true;window.__ready=true;setTimeout(()=>{const e=$("splash");e.classList.add("out");setTimeout(()=>e.remove(),600)},Math.max(0,(document.documentElement.classList.contains("lite")?900:2000)-(Date.now()-t00)))};
+setTimeout(()=>{hideSplash();if(!boardReady&&db)warn("Still connecting… check your internet.")},4000);
+(()=>{
+  let pref=null;try{pref=localStorage.getItem("lite")}catch(e){}
+  if(pref!==null)return;
+  let n=0,t0=0,hid=false;
+  document.addEventListener("visibilitychange",()=>{if(document.hidden)hid=true},{once:true});
+  const f=t=>{
+    if(!t0)t0=t;n++;
+    if(t-t0<1500){requestAnimationFrame(f);return}
+    const fps=n*1000/(t-t0);
+    if(!hid&&fps<38){document.documentElement.classList.add("lite");try{localStorage.setItem("lite","1")}catch(e){}if(typeof paintTheme==="function")paintTheme()}
+  };
+  requestAnimationFrame(f);
+})();
+const warn=t=>{$("warn").textContent=t;$("warn").hidden=false};
+let db=null,board={},boardReady=false,viewDay=0,pdate="",fbApp=null,me=null,AU=null,dl={},dlReady=false,dlAt=0,dlCourse="all",dlPast=false,dlEditId=null,dlImgs=[],imgCache={},sessions=[],atts=[],roster=[],pin=undefined,strict=false,isPoster=false,newCode=null,cmsg="",share="";
+const D=p=>doc(db,p),list=s=>s.docs.map(d=>({id:d.id,...d.data()}));
+const idOf=m=>m.replace(/[^A-Z0-9]/g,"");
+
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
+  ["st","at","mt","dl","po"].forEach(id=>$(id).hidden=id!==b.dataset.t);
+  b.scrollIntoView({inline:"center",block:"nearest"});
+  if(b.dataset.t==="mt")renderMat();
+  if(b.dataset.t==="dl")renderDL();
+  if(b.dataset.t==="po"&&db&&!isPoster)getDoc(D("config/poster")).then(d=>{pin=d.exists()?d.data().pin:null;renderPoster()}).catch(()=>warn("Can’t reach the database."));
+});
+
+const p2=n=>String(n).padStart(2,"0");
+const ymd=d=>d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());
+const addDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return d};
+const dayName=d=>d.toLocaleDateString([],{weekday:"long",day:"numeric",month:"long"});
+const f12=h=>{if(!h)return"";const[a,b]=h.split(":"),n=+a;return (n%12||12)+":"+b+" "+(n<12?"AM":"PM")};
+const tsel=id=>`<div class="row" style="gap:6px"><select id="${id}h" style="flex:1"><option value="">Hr</option>${[1,2,3,4,5,6,7,8,9,10,11,12].map(n=>`<option value="${n}">${n}</option>`).join("")}</select><select id="${id}m" style="flex:1"><option value="">Min</option>${["00","05","10","15","20","25","30","35","40","45","50","55"].map(m=>`<option>${m}</option>`).join("")}</select><select id="${id}a" style="flex:1"><option>AM</option><option>PM</option></select></div>`;
+const tget=id=>{const h=$(id+"h").value,m=$(id+"m").value,a=$(id+"a").value;if(!h&&!m)return"";if(!h||!m)return"bad";return p2((+h%12)+(a==="PM"?12:0))+":"+m};
+const mins=h=>{const[a,b]=h.split(":");return +a*60+ +b};
+const dur=m=>{const h=Math.floor(m/60),r=m%60;return h?`${h}h ${r}m`:`${r}m`};
+function renderStatus(){
+  const L={h:["Holding","h"],c:["Cancelled","c"],m:["Moved","m"]};
+  const d=new Date(),now=d.getHours()*60+d.getMinutes(),day=ymd(addDays(viewDay));
+  const tabs=`<div class="row" style="gap:8px"><button class="btn ${viewDay?"s":""}" style="flex:1" id="d0">Today</button><button class="btn ${viewDay?"":"s"}" style="flex:1" id="d1">Tomorrow</button></div><p class="sub" style="margin:8px 0 0">${dayName(addDays(viewDay))}</p>`;
+  const soon=dlItems().filter(x=>{const n=dday(x.due);return n>=0&&n<=7}).sort(dcmp).slice(0,3);
+  const cu=viewDay===0&&soon.length?`<div class="card"><b>Coming up</b>${soon.map(x=>`<div class="row" style="margin-top:8px;font-size:14px"><span>${x.course} · ${esc(x.title)}<br><small>${esc(x.type)} · ${dfmt(x.due)}${x.time?" · "+f12(x.time):""}</small></span><span class="b ${dday(x.due)<=1?"c":"m"}">${dwhen(dday(x.due))}</span></div>`).join("")}<button class="btn s" style="margin-top:10px" id="dlall">See all deadlines</button></div>`:"";
+  $("st").innerHTML=tabs+cu+COURSES.map(([code,title])=>{
+    const s=board[code.replace(" ","")+"_"+day];
+    let l=s?L[s.kind]:[boardReady?"No update":"Loading…","n"],line="";
+    if(s&&s.kind!=="c"&&s.st&&s.en){
+      const a=mins(s.st),z=mins(s.en);
+      if(viewDay===0&&now>=z){l=["Class held","h"];line=`${f12(s.st)} to ${f12(s.en)}`}
+      else if(viewDay===0&&now>=a){l=["In progress","h"];line=`Ends ${f12(s.en)} · ${dur(z-now)} left`}
+      else line=`${s.kind==="m"?"New time":"Starts"} ${f12(s.st)} to ${f12(s.en)}${viewDay===0?" · in "+dur(a-now):""}`;
+    }
+    return `<div class="card"><div class="row"><div><b>${code}</b><br><small>${title}</small></div><span class="b ${l[1]}">${l[0]}</span></div>${s?`<div style="margin-top:8px">${line?`<b>${line}</b><br>`:""}${esc(s.note||"")}<br><small>Posted ${tm(s.t)} by ${esc(s.by||"poster")}</small></div>`:""}</div>`;
+  }).join("");
+  if($("dlall"))$("dlall").onclick=()=>document.querySelector("nav button[data-t=dl]").click();
+  $("d0").onclick=()=>{viewDay=0;renderStatus()};
+  $("d1").onclick=()=>{viewDay=1;renderStatus()};
+}
+setInterval(renderStatus,30000);
+
+async function shrink(file){
+  const bmp=await createImageBitmap(file);
+  let max=1100,q=.72,out="";
+  for(let i=0;i<7;i++){
+    const sc=Math.min(1,max/Math.max(bmp.width,bmp.height)),w=Math.round(bmp.width*sc),h=Math.round(bmp.height*sc);
+    const c=document.createElement("canvas");c.width=w;c.height=h;
+    const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,w,h);x.drawImage(bmp,0,0,w,h);
+    out=c.toDataURL("image/jpeg",q);
+    if(out.length<270000)break;
+    q=Math.max(.4,q-.08);max=Math.round(max*.85);
+  }
+  if(bmp.close)bmp.close();
+  return out.length<300000?out:null;
+}
+function drawThumbs(){
+  const el=$("dlthumbs");if(!el)return;
+  el.innerHTML=dlImgs.map((u,i)=>`<div class="thumb"><img src="${u}" alt="Picture ${i+1}"><button data-rm="${i}" aria-label="Remove picture">✕</button></div>`).join("");
+  el.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{dlImgs.splice(+b.dataset.rm,1);drawThumbs()});
+}
+const okImg=u=>typeof u==="string"&&/^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(u);
+function openLB(html){$("lbc").innerHTML=html;$("lb").hidden=false;document.body.style.overflow="hidden"}
+function closeLB(){$("lb").hidden=true;document.body.style.overflow=""}
+async function showImgs(id){
+  openLB('<p class="sub" style="color:#fff;text-align:center">Loading…</p>');
+  try{
+    if(!imgCache[id]){const d=await getDoc(D("config/dlimg_"+id));imgCache[id]=d.exists()?[0,1,2].map(i=>d.data()["i"+i]).filter(okImg):[]}
+    const arr=imgCache[id];
+    if(!arr.length){openLB('<p class="sub" style="color:#fff;text-align:center">No picture found.</p>');return}
+    openLB(arr.map((u,i)=>`<img src="${u}" alt="Picture ${i+1}"><a class="btn s" data-save="${i}">Save picture ${arr.length>1?i+1:""}</a>`).join(""));
+    $("lbc").querySelectorAll("[data-save]").forEach(b=>b.onclick=async()=>{
+      const bl=await (await fetch(arr[+b.dataset.save])).blob(),a=document.createElement("a");
+      a.href=URL.createObjectURL(bl);a.download="assignment-"+(+b.dataset.save+1)+".jpg";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+    });
+  }catch(e){openLB('<p class="sub" style="color:#fff;text-align:center">Couldn’t load the picture. Check your internet.</p>')}
+}
+$("lbx").onclick=closeLB;
+$("lb").onclick=e=>{if(e.target.id==="lb"||e.target.id==="lbc")closeLB()};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeLB()});
+function getPos(){return new Promise((ok,no)=>{if(!navigator.geolocation)return no({code:0});navigator.geolocation.getCurrentPosition(p=>ok(p.coords),no,{enableHighAccuracy:true,timeout:15000,maximumAge:0})})}
+const geoMsg=e=>e&&e.code===1?"Location is blocked. Allow location for this app in your phone settings, then try again.":e&&e.code===3?"Couldn’t get your location in time. Step outside or near a window and try again.":"Couldn’t read your location on this phone.";
+const dist=(a,b,c,d)=>{const R=6371000,t=x=>x*Math.PI/180,dl=t(c-a),dn=t(d-b),h=Math.sin(dl/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+function manualAdd(sid){
+  const ss=sessions.find(x=>x.id===sid);if(!ss)return;
+  openLB(`<div class="card" style="max-width:520px;margin:0 auto"><b>Add a student to this session</b><p class="sub" style="margin:4px 0 10px">${esc(ss.course)}. Use this when a student can’t sign for a real reason (for example a phone problem). It is marked “added by poster” in the list and in the export.</p><input id="mname" placeholder="Student’s full name"><input id="mmat" placeholder="Matric number" autocapitalize="characters"><input id="mwhy" placeholder="Reason (required)"><button class="btn" id="msave" style="margin:8px 0 0;max-width:none">Add student</button><div class="msg" id="mmsg2"></div></div>`);
+  $("msave").onclick=async()=>{
+    const name=$("mname").value.trim(),mat=$("mmat").value.trim().toUpperCase(),why=$("mwhy").value.trim(),m=$("mmsg2");
+    if(!name||!mat||!why){m.textContent="Fill in all three boxes.";return}
+    const ref=D("att/"+sid+"_"+idOf(mat));
+    try{
+      if((await getDoc(ref)).exists()){m.textContent="This matric number is already on the list.";return}
+      await setDoc(ref,{sid,course:ss.course,name,matric:mat,dev:"",t:Date.now(),m:"manual",why});
+      closeLB();
+    }catch(e){m.textContent="Couldn’t add. Check your connection."}
+  };
+}
+const AIM={explain:"Explain this in simple language with a real-life example (a Nigerian one if possible). Then give me a 3-point summary.",hints:"Do not just give me the final answer. Break it into small steps, give me a hint for step 1, and ask me to try it before you show more.",quiz:"Ask me 5 practice questions on this, one at a time, and tell me whether each of my answers is right.",check:"Check my attempt below. Point out any mistakes and explain how to fix them."};
+let aiCtx=null,aiMode="explain";
+function aiPrompt(extra){
+  const c=aiCtx;
+  let p="I'm a 300-level Economics student at LASU Ojo, Nigeria.\nCourse: "+c.course+(c.courseTitle?" ("+c.courseTitle+")":"")+"\n"+c.kind+": "+c.title;
+  if(c.lec)p+="\nLecturer or topic: "+c.lec;
+  if(c.text)p+="\nQuestion:\n"+c.text.slice(0,1200);
+  if(c.note)p+="\nNote: "+c.note.slice(0,200);
+  p+="\n\n"+AIM[aiMode];
+  if(extra)p+="\n\nMy message:\n"+extra.slice(0,600);
+  p+="\n\nPlease explain in a way I can understand. I want to learn, so help me write my own answer.";
+  return p;
+}
+function askAI(ctx,mode){aiCtx=ctx;aiMode=mode;drawAI()}
+function drawAI(){
+  const c=aiCtx,keep=$("aix")?$("aix").value:"";
+  const chips=[["explain","Explain simply"],["hints","Step-by-step hints"],["quiz","Quiz me"],["check","Check my answer"]];
+  const tip=c.tip==="file"?"Tip: ChatGPT and Gemini can’t open private Drive files. Open the file, download it, and attach it inside the AI app for the best answers.":c.tip==="pic1"?"Tip: this assignment has pictures. Tap View picture, save it, and attach it inside the AI app.":"";
+  openLB(`<div class="card" style="max-width:520px;margin:0 auto"><b>Ask AI about this</b><p class="sub" style="margin:4px 0 10px">${esc(c.course)} · ${esc(c.title)}</p><div style="display:flex;gap:8px;flex-wrap:wrap">${chips.map(([k,l])=>`<button class="b ${aiMode===k?"h":"n"}" style="background:${aiMode===k?"rgba(76,196,137,.2)":"none"};cursor:pointer" data-aim="${k}">${l}</button>`).join("")}</div><textarea id="aix" rows="4" placeholder="${aiMode==="check"?"Paste your attempt here":"Your own question (optional)"}">${esc(keep)}</textarea><button class="btn" id="aigpt" style="margin:8px 0 0;max-width:none">Open ChatGPT</button><button class="btn" id="aigem" style="margin:8px 0 0;max-width:none">Open Gemini</button><p class="sub" style="margin:10px 0 0">Your prompt is copied too. If the chat box is empty, just paste it. AI can make mistakes, so check with your lecturer’s notes and write your own answer.${tip?"<br><br>"+esc(tip):""}</p></div>`);
+  $("lbc").querySelectorAll("[data-aim]").forEach(b=>b.onclick=()=>{aiMode=b.dataset.aim;drawAI()});
+  const go=url=>{
+    const p=aiPrompt($("aix").value.trim());
+    try{navigator.clipboard&&navigator.clipboard.writeText(p).catch(()=>{})}catch(e){}
+    window.open(url+encodeURIComponent(p),"_blank","noopener");
+  };
+  $("aigpt").onclick=()=>go("https://chatgpt.com/?q=");
+  $("aigem").onclick=()=>go("https://gemini.google.com/guided-learning?query=");
+}
+const DTYPES=["Assignment","Test","Quiz","Exam","Project","Presentation","Other"];
+const dday=due=>Math.round((new Date(due+"T12:00:00")-new Date(ymd(new Date())+"T12:00:00"))/864e5);
+const dwhen=n=>n===0?"Due today":n===1?"Tomorrow":n>1?"In "+n+" days":n===-1?"Yesterday":(-n)+" days ago";
+const dfmt=due=>new Date(due+"T12:00:00").toLocaleDateString([],{weekday:"short",day:"numeric",month:"short"});
+const dcmp=(a,b)=>a.due.localeCompare(b.due)||(a.time||"99").localeCompare(b.time||"99");
+function dlItems(){return Object.entries(dl).filter(([k,v])=>v&&v.due&&v.title).map(([k,v])=>({id:k,...v}))}
+async function loadDL(force){
+  if(!db)return;
+  if(!force&&dlReady&&Date.now()-dlAt<60000)return;
+  try{const d=await getDoc(D("config/deadlines"));dl=d.exists()?d.data():{};dlReady=true;dlAt=Date.now()}catch(e){}
+}
+async function renderDL(force){
+  if(!db){$("dl").innerHTML="";return}
+  if(!dlReady)$("dl").innerHTML=`<p class="sub">Loading…</p>`;
+  await loadDL(force);
+  drawDL();
+}
+function drawDL(){
+  const el=$("dl");
+  const all=dlItems().filter(x=>dlCourse==="all"||x.course===dlCourse);
+  const up=all.filter(x=>dday(x.due)>=0).sort(dcmp),past=all.filter(x=>dday(x.due)<0&&dday(x.due)>=-14).sort((a,b)=>dcmp(b,a));
+  const card=x=>{const n=dday(x.due),cls=n<0?"n":n<=1?"c":n<=3?"m":"h";return `<div class="card"><div class="row"><div><b>${esc(x.title)}</b><br><small>${x.course} · ${esc(x.type)}</small></div><span class="b ${cls}" style="white-space:nowrap">${dwhen(n)}</span></div><div style="margin-top:8px"><b>${dfmt(x.due)}${x.time?" · "+f12(x.time):""}</b>${x.note?`<br>${esc(x.note)}`:""}</div>${x.text?`<div style="margin-top:8px;white-space:pre-wrap">${esc(x.text)}</div>`:""}<div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">${x.img?`<button class="b h" style="background:none;cursor:pointer" data-dli="${esc(x.id)}">View picture${x.img>1?"s ("+x.img+")":""}</button>`:""}${x.link&&safeUrl(x.link)?`<a class="b h" style="text-decoration:none" href="${esc(x.link)}" target="_blank" rel="noopener">Open link</a>`:""}<button class="b h" style="background:none;cursor:pointer" data-ai="${esc(x.id)}">Ask AI</button></div>${isPoster?`<div style="margin-top:8px"><button class="b h" style="background:none;cursor:pointer" data-dle="${esc(x.id)}">Edit</button> <button class="b c" style="background:none;cursor:pointer" data-dld="${esc(x.id)}">Delete</button></div>`:""}</div>`};
+  el.innerHTML=`<select id="dlf" aria-label="Course"><option value="all">All courses</option>${COURSES.map(([c])=>`<option${c===dlCourse?" selected":""}>${c}</option>`).join("")}</select>`
+   +(up.length?up.map(card).join(""):`<div class="card"><p class="sub" style="margin:0">Nothing coming up. Check back soon.</p></div>`)
+   +(past.length?`<button class="btn s" id="dlp" style="margin-top:6px">${dlPast?"Hide":"Show"} past (${past.length})</button>`+(dlPast?past.map(card).join(""):""):"")
+   +`<button class="btn s" id="dlr" style="margin-top:10px">Refresh</button>`;
+  $("dlf").onchange=()=>{dlCourse=$("dlf").value;drawDL()};
+  if($("dlp"))$("dlp").onclick=()=>{dlPast=!dlPast;drawDL()};
+  $("dlr").onclick=()=>renderDL(true);
+  el.querySelectorAll("[data-ai]").forEach(b=>b.onclick=()=>{
+    const x=dl[b.dataset.ai];if(!x)return;const cc=COURSES.find(c=>c[0]===x.course);
+    askAI({course:x.course,courseTitle:cc?cc[1]:"",kind:x.type,title:x.title,text:x.text||"",note:x.note||"",tip:x.img?"pic1":""},/^(Test|Quiz|Exam)$/.test(x.type)?"quiz":"hints");
+  });
+  el.querySelectorAll("[data-dli]").forEach(b=>b.onclick=()=>showImgs(b.dataset.dli));
+  el.querySelectorAll("[data-dld]").forEach(b=>b.onclick=async()=>{
+    try{const id=b.dataset.dld,had=dl[id]&&dl[id].img;await updateDoc(D("config/deadlines"),{[id]:deleteField()});if(had)deleteDoc(D("config/dlimg_"+id)).catch(()=>{});delete dl[id];delete imgCache[id]}catch(e){}
+    drawDL();renderStatus();
+  });
+  el.querySelectorAll("[data-dle]").forEach(b=>b.onclick=async()=>{
+    const x=dl[b.dataset.dle];if(!x||!$("dlc"))return;
+    document.querySelector("nav button[data-t=po]").click();
+    $("dlc").value=x.course;$("dlk").value=x.type;$("dlti").value=x.title;$("dlde").value=x.due;$("dlno").value=x.note||"";$("dltx").value=x.text||"";$("dllk").value=x.link||"";
+    if(x.time){const[h,m]=x.time.split(":"),n=+h;$("dlth").value=String(n%12||12);$("dltm").value=m;$("dlta").value=n<12?"AM":"PM"}else{$("dlth").value="";$("dltm").value="";$("dlta").value="AM"}
+    dlEditId=b.dataset.dle;$("dlmsg").textContent="Editing “"+x.title+"”. Change what you need, then tap Save.";
+    $("dlc").scrollIntoView({behavior:"smooth",block:"center"});
+    dlImgs=[];drawThumbs();
+    if(x.img){try{const d=await getDoc(D("config/dlimg_"+b.dataset.dle));if(d.exists())dlImgs=[0,1,2].map(i=>d.data()["i"+i]).filter(okImg);drawThumbs()}catch(e){}}
+  });
+}
+const CATS=["Past questions","Lecture notes","Slides","Assignments","Textbooks","Other"];
+const mcache={};let mview=null;
+const mkey=c=>c.replace(" ","");
+const safeUrl=u=>/^https?:\/\//i.test(u);
+async function loadMat(code){
+  if(mcache[code])return mcache[code];
+  const d=await getDoc(D("config/mat_"+mkey(code)));
+  return mcache[code]=d.exists()?d.data():{};
+}
+async function renderMat(){
+  const el=$("mt");
+  if(!db){el.innerHTML="";return}
+  if(!mview){
+    el.innerHTML=`<p class="sub">Tap a course to see notes, past questions and more.</p>`+COURSES.map(([c,t])=>`<button class="btn s" style="text-align:left" data-m="${c}">${c} · ${t}</button>`).join("");
+    el.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{mview=b.dataset.m;renderMat()});
+    return;
+  }
+  const head=`<button class="btn s" id="mb">← All courses</button><h3 style="margin:12px 0 2px">${mview}</h3><p class="sub">${COURSES.find(x=>x[0]===mview)[1]}</p>`;
+  el.innerHTML=head+`<p class="sub">Loading…</p>`;
+  $("mb").onclick=()=>{mview=null;renderMat()};
+  let data;
+  try{data=await loadMat(mview)}catch(e){el.innerHTML=head+`<p class="sub">Couldn’t load. Check your internet and try again.</p>`;$("mb").onclick=()=>{mview=null;renderMat()};return}
+  const items=Object.entries(data).filter(([k,v])=>v&&v.link&&safeUrl(v.link)).map(([k,v])=>({id:k,...v})).sort((a,b)=>b.t-a.t);
+  let html=head;
+  if(!items.length)html+=`<div class="card"><p class="sub" style="margin:0">Nothing added yet. Check back soon.</p></div>`;
+  CATS.forEach(cat=>{
+    const g=items.filter(x=>x.cat===cat);if(!g.length)return;
+    html+=`<p style="margin:14px 0 4px"><b>${cat}</b></p>`+g.map(x=>`<div class="card"><div class="row"><div><b>${esc(x.title)}</b>${x.lec?`<br><small>${esc(x.lec)}</small>`:""}</div><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><a class="b h" style="text-decoration:none" href="${esc(x.link)}" target="_blank" rel="noopener">Open</a><button class="b h" style="background:none;cursor:pointer" data-aim2="${esc(x.id)}">Ask AI</button>${isPoster?` <button class="b c" style="background:none;cursor:pointer" data-md="${esc(x.id)}">Delete</button>`:""}</span></div></div>`).join("");
+  });
+  html+=`<button class="btn s" id="mr" style="margin-top:12px">Refresh</button>`;
+  el.innerHTML=html;
+  $("mb").onclick=()=>{mview=null;renderMat()};
+  $("mr").onclick=()=>{delete mcache[mview];renderMat()};
+  el.querySelectorAll("[data-aim2]").forEach(b=>b.onclick=()=>{
+    const x=items.find(i=>i.id===b.dataset.aim2);if(!x)return;const cc=COURSES.find(c=>c[0]===mview);
+    askAI({course:mview,courseTitle:cc?cc[1]:"",kind:x.cat,title:x.title,lec:x.lec||"",text:"",note:"",tip:"file"},/past/i.test(x.cat)?"hints":"explain");
+  });
+  el.querySelectorAll("[data-md]").forEach(b=>b.onclick=async()=>{
+    try{await updateDoc(D("config/mat_"+mkey(mview)),{[b.dataset.md]:deleteField()});delete mcache[mview][b.dataset.md]}catch(e){}
+    renderMat();
+  });
+}
+
+function renderPoster(){
+  const el=$("po");
+  if(!db){el.innerHTML="";return}
+  if(!isPoster){
+    if(pin===undefined){el.innerHTML="<p class=sub>Loading…</p>";return}
+    el.innerHTML=`<div class="card"><b>${pin===null?"Set up poster code":"Poster login"}</b><p class="sub">${pin===null?"Choose a code for lecturers and course reps. Share it only with them.":"For lecturers and course reps only."}</p><input id="pp" type="password" placeholder="Poster code"><button class="btn" id="pg">${pin===null?"Save code":"Unlock"}</button><div class="msg" id="pmsg"></div></div>`;
+    $("pg").onclick=async()=>{
+      const v=$("pp").value.trim();
+      if(v.length<4){$("pmsg").textContent="Use at least 4 characters.";return}
+      if(pin===null){try{await setDoc(D("config/poster"),{pin:v})}catch(x){$("pmsg").textContent="Only the owner can set the poster code. Ask Miracle.";return}isPoster=true;startPoster();renderPoster()}
+      else if(v===pin){isPoster=true;startPoster();renderPoster()}
+      else $("pmsg").textContent="Wrong code.";
+    };
+    return;
+  }
+  const pend=roster.filter(r=>r.status==="pending");
+  const KEEP=["pc","pk","pd","pn","pb","psth","pstm","psta","penh","penm","pena","sc","sv","sl","mc","mk","mti","mle","mli","dlc","dlk","dlti","dlde","dlth","dltm","dlta","dlno","dltx","dllk","sr","sv"],saved={};
+  KEEP.forEach(id=>{const x=$(id);if(x)saved[id]=x.value});
+  const td0=ymd(new Date()),KL={h:"Holding",c:"Cancelled",m:"Moved"};
+  const posted=Object.entries(board).filter(([k])=>{const dd=k.split("_")[1];return dd&&dd>=td0}).sort((a,b)=>a[0].split("_")[1].localeCompare(b[0].split("_")[1])||a[0].localeCompare(b[0]));
+  const postedCard=`<div class="card"><b>Posted updates</b>${posted.length?posted.map(([k,v])=>{const[c,dd]=k.split("_"),cc=COURSES.find(x=>x[0].replace(" ","")===c);return `<div class="row" style="margin:8px 0;font-size:14px"><span>${cc?cc[0]:c} · ${dd===td0?"Today":dd===ymd(addDays(1))?"Tomorrow":dd}<br><small>${KL[v.kind]||""}${v.st?" · "+f12(v.st)+" to "+f12(v.en):""}</small></span><span><button class="b h" style="background:none;cursor:pointer" data-ed="${esc(k)}">Edit</button> <button class="b c" style="background:none;cursor:pointer" data-del="${esc(k)}">Delete</button></span></div>`}).join(""):"<p class=sub>Nothing posted yet.</p>"}</div>`;
+  el.innerHTML=`<div class="card"><b>Post class status</b>
+<select id="pc">${opts}</select>
+<select id="pk"><option value="h">Class is holding</option><option value="c">Class cancelled</option><option value="m">Class moved</option></select>
+<small>Class date</small><input id="pd" type="date" min="${ymd(new Date())}" value="${pdate>=ymd(new Date())?pdate:ymd(new Date())}">
+<small>Starts</small>${tsel("pst")}
+<small>Ends</small>${tsel("pen")}
+<input id="pn" placeholder="Note (new time, venue, reason)">
+<input id="pb" placeholder="Your name or title (e.g. Dr Adekunjo)">
+<button class="btn" id="ps">Post</button>${share?`<a class="btn" style="display:block;text-align:center;text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(share)}">Share to WhatsApp</a>`:""}<div class="msg" id="pm1"></div></div>
+${postedCard}
+<div class="card"><b>Add course material</b>
+<select id="mc">${opts}</select>
+<select id="mk">${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
+<input id="mti" placeholder="Title (e.g. 2023/2024 exam questions)">
+<input id="mle" placeholder="Lecturer or topic (optional)">
+<input id="mli" placeholder="Paste the Google Drive link" inputmode="url" autocapitalize="off">
+<button class="btn" id="ma">Add material</button><div class="msg" id="mmsg"></div>
+<p class="sub">In Google Drive: open the file or folder, tap Share, set General access to “Anyone with the link”, then copy the link.</p></div>
+<div class="card"><b>Add deadline or test</b>
+<select id="dlc">${opts}</select>
+<select id="dlk">${DTYPES.map(c=>`<option>${c}</option>`).join("")}</select>
+<input id="dlti" placeholder="Title (e.g. Test 1, Assignment 2)">
+<small>Date</small><input id="dlde" type="date" min="${ymd(new Date())}">
+<small>Time (optional)</small>${tsel("dlt")}
+<input id="dlno" placeholder="Note or venue (optional)">
+<textarea id="dltx" rows="4" maxlength="2000" placeholder="Assignment question or details (optional). Type short questions here."></textarea>
+<input id="dllk" placeholder="Link, e.g. Google Drive (optional)" inputmode="url" autocapitalize="off">
+<label class="btn s" style="display:block;text-align:center;cursor:pointer;margin:5px 0">Add pictures (up to 3)<input id="dlfile" type="file" accept="image/*" multiple hidden></label>
+<div id="dlthumbs" style="display:flex;gap:10px;flex-wrap:wrap;margin:6px 0"></div>
+<button class="btn" id="dlad">Save</button><div class="msg" id="dlmsg"></div></div>
+<div class="card"><b>Open attendance</b>
+<select id="sc">${opts}</select>
+<select id="sr"><option value="0">Location check: off</option><option value="100">Location check: 100 m</option><option value="150" selected>Location check: 150 m</option><option value="250">Location check: 250 m</option><option value="500">Location check: 500 m</option></select>
+<input id="sv" placeholder="Venue name (e.g. Eco Hall)">
+<input id="sl" placeholder="Lecturer name (e.g. Dr Adekunjo)" autocomplete="name">
+<small>Start the session while you are standing in the venue. Your location becomes the centre of the allowed area.</small>
+<button class="btn" id="so">Start 3-minute session</button>
+${newCode?`<p class="sub" style="text-align:center">Show this code in class</p><div class="code">${newCode}</div>`:""}
+<div class="msg" id="pm2"></div></div>
+<div class="card"><b>Today’s sessions</b>${sessions.length?sessions.map(s=>{const rs=atts.filter(a=>a.sid===s.id).sort((a,b)=>a.t-b.t);return `<div class="row" style="margin-top:8px"><div>${s.course}<br><small>${tm(+s.id)} · ${rs.length} present${s.r?" · "+s.r+" m check":""}</small></div><span style="display:flex;gap:6px"><button class="btn s" style="width:auto" data-add="${s.id}">Add</button><button class="btn s" style="width:auto" data-x="${s.id}">Export</button></span></div>`+rs.map(r=>`<div class="row" style="margin:4px 0;font-size:14px"><span>${esc(r.name)} <small>${esc(r.matric)}${r.m==="manual"?" · added by poster":""}${r.d!==undefined?" · "+r.d+" m":""}</small></span><button class="b c" style="background:none;cursor:pointer" data-r="${esc(r.id)}">Remove</button></div>`).join("")}).join(""):"<p class=sub>None yet.</p>"}</div>
+<div class="card"><b>Class list</b><p class="sub">${roster.filter(r=>r.status==="approved").length} approved · ${pend.length} waiting</p><button class="btn s" id="st2">${strict?"Approval required to sign: ON (tap to turn off)":"Approval required to sign: OFF (tap to turn on)"}</button>${pend.length?`<button class="btn s" id="aa">Approve all waiting</button>`:""}${pend.map(r=>`<div class="row" style="margin:6px 0;font-size:14px"><span>${esc(r.name)} <small>${esc(r.matric)}</small></span><span><button class="b h" style="background:none;cursor:pointer" data-ok="${esc(r.id)}">Approve</button> <button class="b c" style="background:none;cursor:pointer" data-no="${esc(r.id)}">Reject</button></span></div>`).join("")}</div>
+<div class="card"><b>Change poster code</b>${me?`<p class="sub">Signed in as ${esc(me.email||"owner")}</p><input id="cn" type="password" placeholder="New poster code"><button class="btn s" id="cc">Change code</button>`:`<p class="sub">Only the owner can change the code. Sign in with the owner’s Google account.</p><button class="btn s" id="so2">Owner sign-in with Google</button>`}<div class="msg">${cmsg}</div></div>`;
+  KEEP.forEach(id=>{if(saved[id]!==undefined&&$(id))$(id).value=saved[id]});
+  el.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>updateDoc(D("config/board"),{[b.dataset.del]:deleteField()}));
+  el.querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>{
+    const k=b.dataset.ed,v=board[k];if(!v)return;
+    const[c,dd]=k.split("_"),cc=COURSES.find(x=>x[0].replace(" ","")===c);
+    if(cc)$("pc").value=cc[0];
+    $("pd").value=dd;$("pk").value=v.kind;$("pn").value=v.note||"";$("pb").value=v.by||"";
+    ["pst","pen"].forEach((id,i)=>{const t=i?v.en:v.st;if(t){const[h,m]=t.split(":"),n=+h;$(id+"h").value=String(n%12||12);$(id+"m").value=m;$(id+"a").value=n<12?"AM":"PM"}else{$(id+"h").value="";$(id+"m").value="";$(id+"a").value="AM"}});
+    $("pm1").textContent="Editing "+(cc?cc[0]:c)+". Change what you need, then tap Post.";
+    $("pc").scrollIntoView({behavior:"smooth",block:"center"});
+  });
+  drawThumbs();
+  $("dlfile").onchange=async e=>{
+    const files=[...e.target.files];e.target.value="";
+    for(const f of files){
+      if(dlImgs.length>=3){$("dlmsg").textContent="Up to 3 pictures per item.";break}
+      $("dlmsg").textContent="Preparing picture…";
+      try{const d=await shrink(f);if(!d)throw 0;dlImgs.push(d)}catch(x){$("dlmsg").textContent="Couldn’t use that picture. Try another one.";return}
+    }
+    $("dlmsg").textContent="";drawThumbs();
+  };
+  $("dlad").onclick=async()=>{
+    const m=$("dlmsg"),course=$("dlc").value,type=$("dlk").value,title=$("dlti").value.trim(),due=$("dlde").value,note=$("dlno").value.trim(),time=tget("dlt");
+    if(!title||!due){m.textContent="Add a title and a date.";return}
+    if(time==="bad"){m.textContent="Pick the hour and the minute, or leave the time empty.";return}
+    const text=$("dltx").value.trim().slice(0,2000),link=$("dllk").value.trim();
+    if(link&&!safeUrl(link)){m.textContent="The link must start with https://";return}
+    const id=dlEditId||"d"+Date.now(),item={course,type,title,due,note,t:Date.now()};
+    if(time)item.time=time;if(text)item.text=text;if(link)item.link=link;
+    const hadImg=dlEditId&&dl[dlEditId]&&dl[dlEditId].img;
+    if(dlImgs.length)item.img=dlImgs.length;
+    const upd={[id]:item},cut=ymd(addDays(-14));
+    Object.entries(dl).forEach(([k,v])=>{if(v&&v.due&&v.due<cut){upd[k]=deleteField();if(v.img)deleteDoc(D("config/dlimg_"+k)).catch(()=>{})}});
+    try{
+      if(dlImgs.length){const o={n:dlImgs.length};dlImgs.forEach((u,i)=>o["i"+i]=u);await setDoc(D("config/dlimg_"+id),o);imgCache[id]=[...dlImgs]}
+      else if(hadImg){await deleteDoc(D("config/dlimg_"+id));delete imgCache[id]}
+      try{await updateDoc(D("config/deadlines"),upd)}catch(x){await setDoc(D("config/deadlines"),{[id]:item})}
+      dl[id]=item;dlReady=true;dlEditId=null;$("dlti").value="";$("dlno").value="";$("dltx").value="";$("dllk").value="";dlImgs=[];drawThumbs();
+      m.textContent="Saved.";renderStatus();
+    }catch(e){m.textContent="Couldn’t save. Check your connection."}
+  };
+  $("ma").onclick=async()=>{
+    const code=$("mc").value,cat=$("mk").value,title=$("mti").value.trim(),lec=$("mle").value.trim(),link=$("mli").value.trim(),m=$("mmsg");
+    if(!title||!link){m.textContent="Add a title and a link.";return}
+    if(!safeUrl(link)){m.textContent="The link must start with https://";return}
+    const id="m"+Date.now(),item={cat,title,lec,link,t:Date.now()};
+    try{
+      await setDoc(D("config/mat_"+mkey(code)),{[id]:item},{merge:true});
+      if(mcache[code])mcache[code][id]=item;
+      $("mti").value="";$("mli").value="";m.textContent="Added to "+code+".";
+    }catch(e){m.textContent="Couldn’t add it. Check your connection."}
+  };
+  $("ps").onclick=async()=>{
+    const t=Date.now();
+    const st=tget("pst"),en=tget("pen"),kd=$("pk").value;
+    if(kd!=="c"&&(st==="bad"||en==="bad")){$("pm1").textContent="Pick the hour and the minute for both times.";return}
+    if(kd!=="c"&&(st||en)&&(!st||!en||en<=st)){$("pm1").textContent="Set both a start and an end time, with the end after the start.";return}
+    const e={kind:kd,note:$("pn").value.trim(),by:$("pb").value.trim(),t};
+    if(kd!=="c"&&st){e.st=st;e.en=en}
+    const dt=$("pd").value,td=ymd(new Date());
+    if(!dt||dt<td){$("pm1").textContent="Pick today or a future date.";return}
+    pdate=dt;
+    const key=$("pc").value.replace(" ","")+"_"+dt,ref=D("config/board");
+    const upd={[key]:e};
+    Object.keys(board).forEach(k2=>{const dd=k2.split("_")[1];if(!dd||dd<td)upd[k2]=deleteField()});
+    try{await updateDoc(ref,upd)}catch(x){await setDoc(ref,{[key]:e})}
+    const c=COURSES.find(x=>x[0]===$("pc").value),k={h:"is holding",c:"is CANCELLED",m:"has MOVED"}[$("pk").value],n=$("pn").value.trim();
+    share=`📢 ${c[0]} (${c[1]}) ${k} ${dt===td?"today":dt===ymd(addDays(1))?"tomorrow":"on "+dayName(new Date(dt+"T12:00:00"))}${st&&kd!=="c"?" from "+f12(st)+" to "+f12(en):""}.${n?"\n"+n:""}\nAll updates: ${location.origin+location.pathname}`;
+    $("pn").value="";renderPoster();$("pm1").textContent="Posted. Tap Share to WhatsApp to tell the class group.";
+  };
+  $("so").onclick=async()=>{
+    const m=$("pm2"),r=+$("sr").value,venue=$("sv").value.trim();
+    const lecturer=$("sl").value.trim();
+    if(!lecturer){m.textContent="Enter the lecturer’s name before starting the session.";return}
+    const t=Date.now(),code=String(Math.floor(1000+Math.random()*9000)),sess={course:$("sc").value,code,exp:t+180000,t,lecturer,venue};
+    if(r){
+      m.textContent="Getting the venue location…";
+      try{
+        const g=await getPos();
+        if(g.accuracy>150){m.textContent="Your location isn’t accurate enough (about ±"+Math.round(g.accuracy)+" m). Go near a window or outside and try again, or turn the location check off.";return}
+        sess.lat=g.latitude;sess.lng=g.longitude;sess.r=r;
+      }catch(e){m.textContent=geoMsg(e)+" You can also turn the location check off.";return}
+    }
+    await setDoc(D("sessions/"+t),sess);
+    newCode=code;renderPoster();
+  };
+  el.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{
+    const s=sessions.find(x=>x.id===b.dataset.x),rows=atts.filter(a=>a.sid===s.id).sort((a,b)=>a.t-b.t);
+    const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+    const csv=["Course,Date,No.,Name,Matric,Time,Method,Distance (m)"].concat(rows.map((r,i)=>[s.course,new Date(+s.id).toLocaleDateString(),i+1,q(r.name),q(r.matric),tm(r.t),r.m==="manual"?"Added by poster":r.m==="gps"?"Location verified":"Code",r.d===undefined?"":r.d].join(","))).join("\n");
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+    a.download=`${s.course.replace(" ","")}_attendance_${new Date(+s.id).toISOString().slice(0,10)}.csv`;a.click();
+  });
+  el.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>manualAdd(b.dataset.add));
+  el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>deleteDoc(D("att/"+b.dataset.r)));
+  $("st2").onclick=()=>setDoc(D("config/rules"),{strict:!strict});
+  if($("aa"))$("aa").onclick=async()=>{for(const r of pend)await updateDoc(D("roster/"+r.id),{status:"approved"})};
+  el.querySelectorAll("[data-ok]").forEach(b=>b.onclick=()=>updateDoc(D("roster/"+b.dataset.ok),{status:"approved"}));
+  el.querySelectorAll("[data-no]").forEach(b=>b.onclick=()=>deleteDoc(D("roster/"+b.dataset.no)));
+  if($("so2"))$("so2").onclick=async()=>{
+    try{const {m,a}=await loadAuth();await m.signInWithPopup(a,new m.GoogleAuthProvider());cmsg=""}
+    catch(x){cmsg="Sign-in didn’t complete. Try again."}
+    renderPoster();
+  };
+  if($("cc"))$("cc").onclick=async()=>{
+    const v=$("cn").value.trim();
+    if(v.length<4){cmsg="Use at least 4 characters.";renderPoster();return}
+    try{await setDoc(D("config/poster"),{pin:v});cmsg="Code changed. Share the new one with your posters."}
+    catch(x){cmsg="Only the owner can change the code."}
+    renderPoster();
+  };
+}
+
+function showAttendanceReceipt({name,matric,course,session,recordedAt}){
+ const courseInfo=COURSES.find(c=>c[0]===course),date=new Date(recordedAt);
+ const rows=[["Student",name],["Matric number",matric],["Course",courseInfo?courseInfo[0]+" · "+courseInfo[1]:course],["Lecturer",session.lecturer||"Not provided"],["Venue",session.venue||"Not specified"],["Date & time",date.toLocaleString([],{dateStyle:"medium",timeStyle:"short"})],["Attendance status","Present"]];
+ $("successCourse").textContent=courseInfo?courseInfo[0]+" · "+courseInfo[1]:course;
+ $("receiptRows").innerHTML=rows.map(([k,v])=>`<div class="receipt-row"><span>${esc(k)}</span><strong>${esc(v)}</strong></div>`).join("");
+ const box=$("attendanceSuccess");box.hidden=false;$("successClose").focus();
+}
+$("successClose").onclick=()=>{$("attendanceSuccess").hidden=true};
+$("attendanceSuccess").addEventListener("click",e=>{if(e.target.classList.contains("success-backdrop"))$("attendanceSuccess").hidden=true});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("attendanceSuccess").hidden)$("attendanceSuccess").hidden=true});
+
+$("as").onclick=async()=>{
+  const m=$("amsg"),course=$("ac").value,name=$("an").value.trim(),mat=$("am").value.trim().toUpperCase(),code=$("ak").value.trim();
+  if(!db){m.textContent="App isn’t connected yet.";return}
+  if(!name||!mat||!code){m.textContent="Fill in every box.";return}
+  m.textContent="Checking…";
+  try{
+    const q=await getDocs(query(collection(db,"sessions"),where("code","==",code),where("course","==",course)));
+    const s=list(q).filter(x=>Date.now()<x.exp).sort((a,b)=>b.t-a.t)[0];
+    if(!s){m.textContent="Invalid or expired code for this course.";return}
+    const id=idOf(mat),rs=await getDoc(D("config/rules")),need=rs.exists()&&rs.data().strict===true;
+    let nm=name;
+    if(need){
+      const r=await getDoc(D("roster/"+id));
+      if(!r.exists()||r.data().status!=="approved"){m.textContent="Your matric number isn’t approved yet. Register below and ask a course rep.";return}
+      nm=r.data().name;
+    }
+    let dev="";try{dev=localStorage.getItem("dev")||"";if(!dev){dev=Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem("dev",dev)}}catch(e){}
+    if(dev){
+      const dq=await getDocs(query(collection(db,"att"),where("sid","==",s.id),where("dev","==",dev)));
+      if(!dq.empty){m.textContent="This phone has already signed for this class.";return}
+    }
+    const ref=D("att/"+s.id+"_"+id);
+    if((await getDoc(ref)).exists()){m.textContent="This matric number has already signed.";return}
+    let geo={};
+    if(s.r){
+      m.textContent="Checking your location…";
+      let g;try{g=await getPos()}catch(e){m.textContent=geoMsg(e);return}
+      if(g.accuracy>300){m.textContent="Your phone gave only an approximate location (about ±"+Math.round(g.accuracy)+" m). Turn on precise or high-accuracy location, then try again.";return}
+      const dd=dist(s.lat,s.lng,g.latitude,g.longitude);
+      if(dd>s.r+Math.min(g.accuracy,100)){m.textContent="You’re about "+Math.round(dd)+" m from "+(s.venue||"the venue")+". You must be within "+s.r+" m to mark attendance.";return}
+      geo={d:Math.round(dd),acc:Math.round(g.accuracy)};
+    }
+    const recordedAt=Date.now();
+    await setDoc(ref,{sid:s.id,course,name:nm,matric:mat,dev,t:recordedAt,m:s.r?"gps":"code",...geo});
+    m.textContent="You’re marked present for "+course+".";
+    showAttendanceReceipt({name:nm,matric:mat,course,session:s,recordedAt});
+  }catch(e){m.textContent="Something went wrong. Check your connection and try again."}
+};
+
+$("rs").onclick=async()=>{
+  const m=$("rmsg"),name=$("rn").value.trim(),mat=$("rm").value.trim().toUpperCase();
+  if(!db){m.textContent="App isn’t connected yet.";return}
+  if(!name||!mat){m.textContent="Fill in both boxes.";return}
+  try{
+    const ref=D("roster/"+idOf(mat)),ex=await getDoc(ref);
+    if(ex.exists()){m.textContent=ex.data().status==="approved"?"You’re already approved.":"Already registered. Waiting for approval.";return}
+    await setDoc(ref,{name,matric:mat,status:"pending",t:Date.now()});
+    m.textContent="Registered. A course rep will approve you.";
+  }catch(e){m.textContent="Something went wrong. Try again."}
+};
+
+async function loadAuth(){
+  if(AU)return AU;
+  const m=await import("https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js");
+  const a=m.getAuth(fbApp);
+  m.onAuthStateChanged(a,u=>{me=u;renderPoster()});
+  AU={m,a};return AU;
+}
+const err=()=>{warn("Can’t reach the database. Check your connection.");hideSplash()};
+// Only posters listen to the big collections, so students use very few database reads.
+function startPoster(){
+  if(startPoster.on)return;startPoster.on=true;
+  const today=c=>query(collection(db,c),where("t",">=",t0));
+  onSnapshot(today("sessions"),s=>{sessions=list(s).sort((a,b)=>b.t-a.t);renderPoster()},err);
+  onSnapshot(today("att"),s=>{atts=list(s);renderPoster()},err);
+  onSnapshot(collection(db,"roster"),s=>{roster=list(s);renderPoster()},err);
+  onSnapshot(D("config/rules"),d=>{strict=d.exists()&&d.data().strict===true;renderPoster()},err);
+  loadAuth().catch(()=>{});
+}
+async function startDL(){await loadDL();renderStatus()}
+
+renderStatus();
+try{
+  if(String(firebaseConfig.apiKey).includes("PASTE"))throw new Error("config");
+  fbApp=initializeApp(firebaseConfig);db=getFirestore(fbApp);
+  startDL();
+  onSnapshot(D("config/board"),d=>{board=d.exists()?d.data():{};boardReady=true;if($("warn").textContent.startsWith("Still"))$("warn").hidden=true;renderStatus();hideSplash()},err);
+}catch(e){warn("Setup not finished: the Firebase details in firebase-config.js are missing.");hideSplash()}
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script></body></html>
