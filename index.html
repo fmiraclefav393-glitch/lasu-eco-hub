@@ -120,13 +120,14 @@ window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElem
 <input id="am" placeholder="Matric number" autocapitalize="characters">
 <input id="ak" placeholder="Class code from lecturer" inputmode="numeric" maxlength="4">
 <button class="btn" id="as">Mark me present</button>
-<div class="msg" id="amsg"></div></div>
+<div class="msg" id="amsg"></div>
+<p class="sub" style="margin:8px 0 0">If your lecturer turns on the location check, the app asks for your location once, when you tap Mark me present. Only your distance from the venue is saved, not where you are.</p></div>
 <div class="card"><b>Register (one time)</b><p class="sub">Add your name and matric number. A course rep will approve it.</p><input id="rn" placeholder="Full name"><input id="rm" placeholder="Matric number" autocapitalize="characters"><button class="btn s" id="rs">Register</button><div class="msg" id="rmsg"></div></div>
 </section>
 <section id="mt" hidden></section>
 <section id="dl" hidden></section>
 <section id="po" hidden></section>
-<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 12</footer>
+<footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 13</footer>
 </main>
 <div id="lb" hidden><button id="lbx" aria-label="Close">✕</button><div id="lbc"></div></div>
 <script type="module">
@@ -280,6 +281,23 @@ async function showImgs(id){
 $("lbx").onclick=closeLB;
 $("lb").onclick=e=>{if(e.target.id==="lb"||e.target.id==="lbc")closeLB()};
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeLB()});
+function getPos(){return new Promise((ok,no)=>{if(!navigator.geolocation)return no({code:0});navigator.geolocation.getCurrentPosition(p=>ok(p.coords),no,{enableHighAccuracy:true,timeout:15000,maximumAge:0})})}
+const geoMsg=e=>e&&e.code===1?"Location is blocked. Allow location for this app in your phone settings, then try again.":e&&e.code===3?"Couldn’t get your location in time. Step outside or near a window and try again.":"Couldn’t read your location on this phone.";
+const dist=(a,b,c,d)=>{const R=6371000,t=x=>x*Math.PI/180,dl=t(c-a),dn=t(d-b),h=Math.sin(dl/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(dn/2)**2;return 2*R*Math.asin(Math.sqrt(h))};
+function manualAdd(sid){
+  const ss=sessions.find(x=>x.id===sid);if(!ss)return;
+  openLB(`<div class="card" style="max-width:520px;margin:0 auto"><b>Add a student to this session</b><p class="sub" style="margin:4px 0 10px">${esc(ss.course)}. Use this when a student can’t sign for a real reason (for example a phone problem). It is marked “added by poster” in the list and in the export.</p><input id="mname" placeholder="Student’s full name"><input id="mmat" placeholder="Matric number" autocapitalize="characters"><input id="mwhy" placeholder="Reason (required)"><button class="btn" id="msave" style="margin:8px 0 0;max-width:none">Add student</button><div class="msg" id="mmsg2"></div></div>`);
+  $("msave").onclick=async()=>{
+    const name=$("mname").value.trim(),mat=$("mmat").value.trim().toUpperCase(),why=$("mwhy").value.trim(),m=$("mmsg2");
+    if(!name||!mat||!why){m.textContent="Fill in all three boxes.";return}
+    const ref=D("att/"+sid+"_"+idOf(mat));
+    try{
+      if((await getDoc(ref)).exists()){m.textContent="This matric number is already on the list.";return}
+      await setDoc(ref,{sid,course:ss.course,name,matric:mat,dev:"",t:Date.now(),m:"manual",why});
+      closeLB();
+    }catch(e){m.textContent="Couldn’t add. Check your connection."}
+  };
+}
 const AIM={explain:"Explain this in simple language with a real-life example (a Nigerian one if possible). Then give me a 3-point summary.",hints:"Do not just give me the final answer. Break it into small steps, give me a hint for step 1, and ask me to try it before you show more.",quiz:"Ask me 5 practice questions on this, one at a time, and tell me whether each of my answers is right.",check:"Check my attempt below. Point out any mistakes and explain how to fix them."};
 let aiCtx=null,aiMode="explain";
 function aiPrompt(extra){
@@ -416,7 +434,7 @@ function renderPoster(){
     return;
   }
   const pend=roster.filter(r=>r.status==="pending");
-  const KEEP=["pc","pk","pd","pn","pb","psth","pstm","psta","penh","penm","pena","sc","mc","mk","mti","mle","mli","dlc","dlk","dlti","dlde","dlth","dltm","dlta","dlno","dltx","dllk"],saved={};
+  const KEEP=["pc","pk","pd","pn","pb","psth","pstm","psta","penh","penm","pena","sc","mc","mk","mti","mle","mli","dlc","dlk","dlti","dlde","dlth","dltm","dlta","dlno","dltx","dllk","sr","sv"],saved={};
   KEEP.forEach(id=>{const x=$(id);if(x)saved[id]=x.value});
   const td0=ymd(new Date()),KL={h:"Holding",c:"Cancelled",m:"Moved"};
   const posted=Object.entries(board).filter(([k])=>{const dd=k.split("_")[1];return dd&&dd>=td0}).sort((a,b)=>a[0].split("_")[1].localeCompare(b[0].split("_")[1])||a[0].localeCompare(b[0]));
@@ -453,10 +471,13 @@ ${postedCard}
 <button class="btn" id="dlad">Save</button><div class="msg" id="dlmsg"></div></div>
 <div class="card"><b>Open attendance</b>
 <select id="sc">${opts}</select>
+<select id="sr"><option value="0">Location check: off</option><option value="100">Location check: 100 m</option><option value="150" selected>Location check: 150 m</option><option value="250">Location check: 250 m</option><option value="500">Location check: 500 m</option></select>
+<input id="sv" placeholder="Venue name (e.g. Eco Hall)">
+<small>Start the session while you are standing in the venue. Your location becomes the centre of the allowed area.</small>
 <button class="btn" id="so">Start 3-minute session</button>
 ${newCode?`<p class="sub" style="text-align:center">Show this code in class</p><div class="code">${newCode}</div>`:""}
 <div class="msg" id="pm2"></div></div>
-<div class="card"><b>Today’s sessions</b>${sessions.length?sessions.map(s=>{const rs=atts.filter(a=>a.sid===s.id).sort((a,b)=>a.t-b.t);return `<div class="row" style="margin-top:8px"><div>${s.course}<br><small>${tm(+s.id)} · ${rs.length} present</small></div><button class="btn s" style="width:auto" data-x="${s.id}">Export</button></div>`+rs.map(r=>`<div class="row" style="margin:4px 0;font-size:14px"><span>${esc(r.name)} <small>${esc(r.matric)}</small></span><button class="b c" style="background:none;cursor:pointer" data-r="${esc(r.id)}">Remove</button></div>`).join("")}).join(""):"<p class=sub>None yet.</p>"}</div>
+<div class="card"><b>Today’s sessions</b>${sessions.length?sessions.map(s=>{const rs=atts.filter(a=>a.sid===s.id).sort((a,b)=>a.t-b.t);return `<div class="row" style="margin-top:8px"><div>${s.course}<br><small>${tm(+s.id)} · ${rs.length} present${s.r?" · "+s.r+" m check":""}</small></div><span style="display:flex;gap:6px"><button class="btn s" style="width:auto" data-add="${s.id}">Add</button><button class="btn s" style="width:auto" data-x="${s.id}">Export</button></span></div>`+rs.map(r=>`<div class="row" style="margin:4px 0;font-size:14px"><span>${esc(r.name)} <small>${esc(r.matric)}${r.m==="manual"?" · added by poster":""}${r.d!==undefined?" · "+r.d+" m":""}</small></span><button class="b c" style="background:none;cursor:pointer" data-r="${esc(r.id)}">Remove</button></div>`).join("")}).join(""):"<p class=sub>None yet.</p>"}</div>
 <div class="card"><b>Class list</b><p class="sub">${roster.filter(r=>r.status==="approved").length} approved · ${pend.length} waiting</p><button class="btn s" id="st2">${strict?"Approval required to sign: ON (tap to turn off)":"Approval required to sign: OFF (tap to turn on)"}</button>${pend.length?`<button class="btn s" id="aa">Approve all waiting</button>`:""}${pend.map(r=>`<div class="row" style="margin:6px 0;font-size:14px"><span>${esc(r.name)} <small>${esc(r.matric)}</small></span><span><button class="b h" style="background:none;cursor:pointer" data-ok="${esc(r.id)}">Approve</button> <button class="b c" style="background:none;cursor:pointer" data-no="${esc(r.id)}">Reject</button></span></div>`).join("")}</div>
 <div class="card"><b>Change poster code</b>${me?`<p class="sub">Signed in as ${esc(me.email||"owner")}</p><input id="cn" type="password" placeholder="New poster code"><button class="btn s" id="cc">Change code</button>`:`<p class="sub">Only the owner can change the code. Sign in with the owner’s Google account.</p><button class="btn s" id="so2">Owner sign-in with Google</button>`}<div class="msg">${cmsg}</div></div>`;
   KEEP.forEach(id=>{if(saved[id]!==undefined&&$(id))$(id).value=saved[id]});
@@ -530,18 +551,28 @@ ${newCode?`<p class="sub" style="text-align:center">Show this code in class</p><
     $("pn").value="";renderPoster();$("pm1").textContent="Posted. Tap Share to WhatsApp to tell the class group.";
   };
   $("so").onclick=async()=>{
-    const t=Date.now(),code=String(Math.floor(1000+Math.random()*9000));
-    await setDoc(D("sessions/"+t),{course:$("sc").value,code,exp:t+180000,t});
+    const m=$("pm2"),r=+$("sr").value,venue=$("sv").value.trim();
+    const t=Date.now(),code=String(Math.floor(1000+Math.random()*9000)),sess={course:$("sc").value,code,exp:t+180000,t};
+    if(r){
+      m.textContent="Getting the venue location…";
+      try{
+        const g=await getPos();
+        if(g.accuracy>150){m.textContent="Your location isn’t accurate enough (about ±"+Math.round(g.accuracy)+" m). Go near a window or outside and try again, or turn the location check off.";return}
+        sess.lat=g.latitude;sess.lng=g.longitude;sess.r=r;if(venue)sess.venue=venue;
+      }catch(e){m.textContent=geoMsg(e)+" You can also turn the location check off.";return}
+    }
+    await setDoc(D("sessions/"+t),sess);
     newCode=code;renderPoster();
   };
   el.querySelectorAll("[data-x]").forEach(b=>b.onclick=()=>{
     const s=sessions.find(x=>x.id===b.dataset.x),rows=atts.filter(a=>a.sid===s.id).sort((a,b)=>a.t-b.t);
     const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
-    const csv=["Course,Date,No.,Name,Matric,Time"].concat(rows.map((r,i)=>[s.course,new Date(+s.id).toLocaleDateString(),i+1,q(r.name),q(r.matric),tm(r.t)].join(","))).join("\n");
+    const csv=["Course,Date,No.,Name,Matric,Time,Method,Distance (m)"].concat(rows.map((r,i)=>[s.course,new Date(+s.id).toLocaleDateString(),i+1,q(r.name),q(r.matric),tm(r.t),r.m==="manual"?"Added by poster":r.m==="gps"?"Location verified":"Code",r.d===undefined?"":r.d].join(","))).join("\n");
     const a=document.createElement("a");
     a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
     a.download=`${s.course.replace(" ","")}_attendance_${new Date(+s.id).toISOString().slice(0,10)}.csv`;a.click();
   });
+  el.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>manualAdd(b.dataset.add));
   el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>deleteDoc(D("att/"+b.dataset.r)));
   $("st2").onclick=()=>setDoc(D("config/rules"),{strict:!strict});
   if($("aa"))$("aa").onclick=async()=>{for(const r of pend)await updateDoc(D("roster/"+r.id),{status:"approved"})};
@@ -584,7 +615,16 @@ $("as").onclick=async()=>{
     }
     const ref=D("att/"+s.id+"_"+id);
     if((await getDoc(ref)).exists()){m.textContent="This matric number has already signed.";return}
-    await setDoc(ref,{sid:s.id,course,name:nm,matric:mat,dev,t:Date.now()});
+    let geo={};
+    if(s.r){
+      m.textContent="Checking your location…";
+      let g;try{g=await getPos()}catch(e){m.textContent=geoMsg(e);return}
+      if(g.accuracy>300){m.textContent="Your phone gave only an approximate location (about ±"+Math.round(g.accuracy)+" m). Turn on precise or high-accuracy location, then try again.";return}
+      const dd=dist(s.lat,s.lng,g.latitude,g.longitude);
+      if(dd>s.r+Math.min(g.accuracy,100)){m.textContent="You’re about "+Math.round(dd)+" m from "+(s.venue||"the venue")+". You must be within "+s.r+" m to mark attendance.";return}
+      geo={d:Math.round(dd),acc:Math.round(g.accuracy)};
+    }
+    await setDoc(ref,{sid:s.id,course,name:nm,matric:mat,dev,t:Date.now(),m:s.r?"gps":"code",...geo});
     m.textContent="You’re marked present for "+course+".";
   }catch(e){m.textContent="Something went wrong. Check your connection and try again."}
 };
