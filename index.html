@@ -131,6 +131,15 @@ textarea{width:100%;padding:11px;margin:5px 0;border:1px solid var(--gbrd);borde
 .lite .rip{display:none}
 .lite .pres *{animation:none!important;transition:none!important}
 @media(prefers-reduced-motion:reduce){.pres,.pres *{animation:none!important}}
+
+/* ===== Themed background motion ===== */
+#fx{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#fx i{position:absolute;display:block;color:var(--ac);animation:fxDrift linear infinite;will-change:transform}
+#fx svg{display:block;width:100%;height:auto;fill:currentColor}
+@keyframes fxDrift{0%,100%{transform:translate(0,0) rotate(0)}50%{transform:translate(var(--x),var(--y)) rotate(var(--r))}}
+.nofx #fx,.lite #fx{display:none}
+@media(prefers-reduced-motion:reduce){#fx i{animation:none}}
+#fxt{width:100%;margin-top:8px;padding:8px;border-radius:999px;font:inherit;font-size:13px;font-weight:600;color:var(--tx);background:var(--ibg);border:1px solid var(--bd);cursor:pointer}
 </style></head><body>
 <svg class="deco d1" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".55" stop-color="#cfd8d3" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity=".45"/></linearGradient></defs><path d="M50 5C60 5 66 30 95 38C99 50 99 50 95 62C66 70 60 95 50 95C40 95 34 70 5 62C1 50 1 50 5 38C34 30 40 5 50 5Z" fill="url(#gs)" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/></svg>
 <svg class="deco d2" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 5C60 5 66 30 95 38C99 50 99 50 95 62C66 70 60 95 50 95C40 95 34 70 5 62C1 50 1 50 5 38C34 30 40 5 50 5Z" fill="url(#gs)" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/></svg>
@@ -176,11 +185,33 @@ const opts=COURSES.map(c=>`<option value="${c[0]}">${c[0]} · ${c[1]}</option>`)
 $("ac").innerHTML=opts;
 {
   // ===== Colour palettes (saved on this phone only) =====
-  const PALS={green:["Forest","#0f6b3f","#4cc489"],ocean:["Ocean","#0b5cad","#5aa9ff"],violet:["Violet","#6d3fc0","#b48cff"],teal:["Teal","#0a7770","#3fd1c4"],rose:["Rose","#b3265f","#ff7aa8"],ember:["Ember","#b8441c","#ff8a5c"],gold:["Gold","#9a6700","#e0b34a"],slate:["Slate","#37485c","#9fb4cc"]};
+  const PALS={green:["Forest","#0f6b3f","#4cc489","money"],ocean:["Ocean","#0b5cad","#5aa9ff","drop"],violet:["Violet","#6d3fc0","#b48cff","star"],teal:["Teal","#0a7770","#3fd1c4","leaf"],rose:["Rose","#b3265f","#ff7aa8","petal"],ember:["Ember","#b8441c","#ff8a5c","ember"],gold:["Gold","#9a6700","#e0b34a","coin"],slate:["Slate","#37485c","#9fb4cc","orb"]};
   let palKey="green";try{palKey=localStorage.getItem("pal")||"green"}catch(e){}
   if(!PALS[palKey])palKey="green";
   const isDark=()=>{const t=document.documentElement.getAttribute("data-theme");return t==="dark"||(t!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches)};
+  const SHAPES={
+    bill:'<svg viewBox="0 0 100 100"><rect x="2" y="25" width="96" height="50" rx="7"/><circle cx="50" cy="50" r="13" fill="#fff" fill-opacity=".45"/><circle cx="14" cy="50" r="5" fill="#fff" fill-opacity=".35"/><circle cx="86" cy="50" r="5" fill="#fff" fill-opacity=".35"/></svg>',
+    coin:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="48"/><circle cx="50" cy="50" r="36" fill="none" stroke="#fff" stroke-opacity=".45" stroke-width="3"/><text x="50" y="66" text-anchor="middle" font-size="44" font-weight="700" font-family="Arial,sans-serif" fill="#fff" fill-opacity=".5">₦</text></svg>',
+    drop:'<svg viewBox="0 0 100 100"><path d="M50 4C50 4 16 44 16 64a34 34 0 0 0 68 0C84 44 50 4 50 4z"/></svg>',
+    leaf:'<svg viewBox="0 0 100 100"><path d="M8 92C8 42 38 10 92 8C92 60 62 92 8 92z"/><path d="M8 92L62 38" stroke="#fff" stroke-opacity=".4" stroke-width="3" fill="none"/></svg>',
+    star:'<svg viewBox="0 0 100 100"><polygon points="50,4 61,36 95,36 68,56 79,90 50,70 21,90 32,56 5,36 39,36"/></svg>',
+    petal:'<svg viewBox="0 0 100 100"><path d="M50 4C82 32 82 72 50 96C18 72 18 32 50 4z"/></svg>',
+    ember:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="38"/></svg>',
+    orb:'<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46"/></svg>'
+  };
+  let fxKey=null;
+  function renderFx(){
+    if(fxKey===palKey)return;fxKey=palKey;
+    let fx=document.getElementById("fx");
+    if(!fx){fx=document.createElement("div");fx.id="fx";fx.setAttribute("aria-hidden","true");document.body.appendChild(fx)}
+    const type=PALS[palKey][3],n=innerWidth<600?8:12,R=(a,b)=>a+Math.random()*(b-a);
+    fx.innerHTML=Array.from({length:n},()=>{
+      const pick=type==="money"?(Math.random()<.6?"bill":"coin"):type;
+      return `<i style="left:${R(-6,94).toFixed(1)}%;top:${R(-6,94).toFixed(1)}%;width:${R(40,120).toFixed(0)}px;opacity:${R(.16,.34).toFixed(2)};--x:${R(-60,60).toFixed(0)}px;--y:${R(-50,50).toFixed(0)}px;--r:${R(-40,40).toFixed(0)}deg;animation-duration:${R(18,34).toFixed(0)}s;animation-delay:${(-R(0,30)).toFixed(1)}s;filter:blur(${R(1.5,7).toFixed(1)}px)">${SHAPES[pick]}</i>`;
+    }).join("");
+  }
   function applyPal(){
+    renderFx();
     const dk=isDark(),p=PALS[palKey],c=dk?p[2]:p[1],rgb=[1,3,5].map(i=>parseInt(c.slice(i,i+2),16)).join(","),st=document.documentElement.style;
     st.setProperty("--ac",c);st.setProperty("--ok",c);st.setProperty("--acrgb",rgb);
     st.setProperty("--bgimg",dk
@@ -193,6 +224,11 @@ $("ac").innerHTML=opts;
   palEl.id="pal";palEl.setAttribute("aria-label","Colour theme");
   palEl.innerHTML=Object.keys(PALS).map(k=>`<button class="sw" data-p="${k}" title="${PALS[k][0]}" aria-label="${PALS[k][0]} colour"></button>`).join("");
   thp.appendChild(palEl);
+  const fxBtn=document.createElement("button");fxBtn.id="fxt";
+  let fxOn=true;try{fxOn=localStorage.getItem("fx")!=="0"}catch(e){}
+  const fxSet=on=>{document.documentElement.classList.toggle("nofx",!on);fxBtn.textContent="Motion background: "+(on?"On":"Off");try{localStorage.setItem("fx",on?"1":"0")}catch(x){}};
+  fxSet(fxOn);fxBtn.onclick=e=>{e.stopPropagation();fxOn=!fxOn;fxSet(fxOn)};
+  palEl.appendChild(fxBtn);
   palEl.querySelectorAll(".sw").forEach(b=>b.onclick=e=>{e.stopPropagation();palKey=b.dataset.p;try{localStorage.setItem("pal",palKey)}catch(x){}applyPal()});
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change",applyPal);
   const SUN=`<svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle class="core" cx="12" cy="12" r="4"/>${[0,1,2,3,4,5,6,7].map(k=>{const a=k*Math.PI/4,c=Math.cos(a),d=Math.sin(a);return `<line class="ray" style="--dx:${c.toFixed(2)};--dy:${d.toFixed(2)}" x1="${(12+7*c).toFixed(2)}" y1="${(12+7*d).toFixed(2)}" x2="${(12+9.6*c).toFixed(2)}" y2="${(12+9.6*d).toFixed(2)}"/>`}).join("")}</svg>`;
