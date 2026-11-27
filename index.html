@@ -150,9 +150,9 @@ window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElem
 </script>
 <main>
 <div class="row" style="align-items:center;gap:10px"><h1 style="flex:1">300L Economics Class Hub</h1><div id="thm" style="position:relative"><button id="thb" class="glass" aria-label="Appearance" aria-haspopup="true" aria-expanded="false"></button><div id="thp" class="glass pop" role="menu" hidden><button class="opt" data-v="light" role="menuitem" aria-label="Light mode" title="Light"></button><button class="opt" data-v="dark" role="menuitem" aria-label="Dark mode" title="Dark"></button><button class="opt" data-v="auto" role="menuitem" aria-label="Phone default" title="Phone default"></button><button class="opt" data-v="lite" role="menuitem" aria-label="Smooth mode" title="Smooth mode (faster on slower phones)"></button></div></div></div>
-<p class="sub">LASU Ojo · Class status and attendance</p>
+<p class="sub" id="greet" style="cursor:pointer"></p>
 <div id="warn" class="warn" hidden></div>
-<nav><button data-t="st" class="on">Today</button><button data-t="at">Attendance</button><button data-t="mt">Materials</button><button data-t="dl">Deadlines</button><button data-t="po">Poster</button></nav>
+<nav><button data-t="st" class="on">Today</button><button data-t="at">Attendance</button><button data-t="mt">Materials</button><button data-t="dl">Deadlines</button><button data-t="po">Poster</button><button data-t="sr">Study</button></nav>
 <section id="st"></section>
 <section id="at" hidden>
 <div class="card"><b>Sign attendance</b>
@@ -167,13 +167,14 @@ window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElem
 </section>
 <section id="mt" hidden></section>
 <section id="dl" hidden></section>
+<section id="sr" hidden></section>
 <section id="po" hidden></section>
 <footer class="sub" style="text-align:center;margin:28px 0 8px">© 2026 MIRAI Industries · Built by David Favour Miracle. All rights reserved.<br>App version 13</footer>
 </main>
 <div id="lb" hidden><button id="lbx" aria-label="Close">✕</button><div id="lbc"></div></div>
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {getFirestore,doc,collection,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,getDocs,deleteField} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+import {getFirestore,doc,collection,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,getDocs,deleteField,arrayUnion} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {firebaseConfig} from "./firebase-config.js";
 
 const COURSES=[["ECO 301","Intermediate Microeconomics 1"],["ECO 331","Intermediate Macroeconomics 1"],["ECO 305","History of Economic Thought"],["ECO 307","Project Evaluation"],["SSC 301","Innovation in Social Science"],["ECO 311","Mathematics for Economist III"],["ECO 317","Environmental Economics"],["ECO 319","Statistics for Economists II"],["ECO 337","International Trade"],["ECO 303","Applied Monetary Economics"]];
@@ -285,6 +286,116 @@ setTimeout(()=>{hideSplash();if(!boardReady&&db)warn("Still connecting… check 
   };
   requestAnimationFrame(f);
 })();
+
+/* ===== Greeting, Study room, rep-update filling ===== */
+function gname(){try{return localStorage.getItem("gname")||""}catch(e){return ""}}
+function greet(){
+  const g=$("greet");if(!g)return;
+  const h=new Date().getHours(),n=gname(),part=h>=5&&h<12?"Good morning":h>=12&&h<17?"Good afternoon":"Good evening";
+  g.textContent=part+(n?", "+n:"")+" · LASU Ojo";
+  g.title=n?"Tap to change your name":"Tap to add your name";
+}
+if($("greet"))$("greet").onclick=()=>{const v=prompt("Your first name (shown in the greeting)",gname());if(v!==null){try{localStorage.setItem("gname",v.trim().slice(0,30))}catch(e){}greet()}};
+greet();setInterval(greet,60000);
+
+let srDoc=null,srUnsub=null,srDay="",srMsg="";
+function srOpenNow(){const n=new Date(),m=n.getHours()*60+n.getMinutes();return m>=510&&m<600}
+const srText=s=>/^https:\/\//i.test(s)?`<a href="${esc(s)}" target="_blank" rel="noopener" style="color:var(--ac);word-break:break-all">${esc(s)}</a>`:esc(s);
+function renderStudy(){
+  const day=ymd(new Date());
+  if(!db){$("sr").innerHTML='<div class="card"><b>Study room</b><p class="sub">Connecting…</p></div>';return}
+  if(srDay!==day||!srUnsub){if(srUnsub)srUnsub();srDay=day;srDoc=null;srUnsub=onSnapshot(D("studyRooms/"+day),d=>{srDoc=d.exists()?d.data():{};drawStudy()},err)}
+  drawStudy();
+}
+function drawStudy(){
+  const el=$("sr");if(!el||el.hidden)return;
+  const r=srDoc||{},items=(r.items||[]).slice().sort((a,b)=>b.t-a.t),keep=$("srX")?$("srX").value:"";
+  const KL={q:"Question",l:"Link",n:"Note"};
+  el.innerHTML=`<div class="card">
+    <b>Study room · tonight</b>
+    <p class="sub" style="margin:4px 0 8px">Sessions run 8:30 PM to 10:00 PM, with a 9:00 PM cutoff. ${srOpenNow()?'<span style="color:var(--ok)">● Open now</span>':"Opens at 8:30 PM"}</p>
+    <select id="srC"><option value="">Choose the course…</option>${COURSES.map(c=>`<option value="${c[0]}"${c[0]===r.course?" selected":""}>${c[0]} · ${esc(c[1])}</option>`).join("")}</select>
+    <input id="srT" placeholder="Topic, e.g. Integration by parts" value="${esc(r.topic||"")}">
+    <button class="btn" id="srS" style="margin:0;max-width:none">Set room</button>
+    <p class="sub" id="srM">${esc(srMsg)}</p>
+  </div>
+  <div class="card">
+    <b>Drop a question, link or note</b>
+    <select id="srK"><option value="q">Question</option><option value="l">Link or reference</option><option value="n">Note</option></select>
+    <textarea id="srX" rows="3" placeholder="Type or paste here. Remote members see it instantly.">${esc(keep)}</textarea>
+    <button class="btn" id="srD" style="margin:0;max-width:none">Drop it in</button>
+  </div>
+  <div class="card"><b>In the room (${items.length})</b>
+    ${items.length?items.map(i=>`<div style="padding:10px 0;border-bottom:1px dashed var(--bd)"><small style="color:var(--mu)">${KL[i.k]||"Note"} · ${esc(i.by||"Classmate")} · ${tm(i.t)}</small><div style="margin-top:4px;white-space:pre-wrap;word-break:break-word">${srText(i.text)}</div>${i.k==="q"?`<button class="b n" data-srai="${esc(i.id)}" style="margin-top:6px;cursor:pointer">Ask AI</button>`:""}</div>`).join(""):'<p class="sub">Nothing dropped yet.</p>'}
+  </div>`;
+  $("srS").onclick=async()=>{
+    const c=$("srC").value;if(!c){srMsg="Choose the course first.";drawStudy();return}
+    try{await setDoc(D("studyRooms/"+srDay),{course:c,topic:$("srT").value.trim().slice(0,120),by:gname()||"Classmate",t:Date.now()},{merge:true});srMsg="Room set for "+c+"."}
+    catch(e){srMsg="Could not reach the room. Check your internet."}
+    drawStudy();
+  };
+  $("srD").onclick=async()=>{
+    const x=$("srX").value.trim();if(!x){srMsg="Write something first.";drawStudy();return}
+    try{await setDoc(D("studyRooms/"+srDay),{items:arrayUnion({id:Date.now().toString(36),k:$("srK").value,text:x.slice(0,600),by:gname()||"Classmate",t:Date.now()})},{merge:true});srMsg="Dropped in.";$("srX").value=""}
+    catch(e){srMsg="Could not send. Check your internet."}
+    drawStudy();
+  };
+  el.querySelectorAll("[data-srai]").forEach(b=>b.onclick=()=>{
+    const it=items.find(i=>i.id===b.dataset.srai);if(!it)return;
+    const cc=r.course&&COURSES.find(c=>c[0]===r.course);
+    askAI({course:r.course||"Economics",courseTitle:cc?cc[1]:"",kind:"Study room question",title:r.topic||"Study room",text:it.text,note:"",tip:""},"deep");
+  });
+}
+
+const WDN=["sunday","monday","tuesday","wednesday","thursday","friday","saturday"],MONN=["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"];
+function parseRep(text){
+  const t=text.toLowerCase(),o={warn:[]},now=new Date(),base=new Date(now.getFullYear(),now.getMonth(),now.getDate(),12);
+  const cm=t.match(/\b(eco|ssc)\s?(\d{3})\b/);
+  const hit=cm&&COURSES.find(c=>c[0]===(cm[1]+" "+cm[2]).toUpperCase());
+  if(hit)o.course=hit[0];else o.warn.push("course not found, pick it");
+  if(/cancel|called off|not hold|no lecture|won'?t hold/.test(t))o.kind="c";
+  else if(/\bmov|relocat|postpon|reschedul|new venue|changed|brought forward|advanced/.test(t))o.kind="m";
+  else if(/hold|going on|proceed|lecture is on/.test(t))o.kind="h";
+  else o.warn.push("could not tell if holding, cancelled or moved");
+  let d=null;
+  if(/\btoday\b/.test(t))d=new Date(base);
+  else if(/\btomorrow\b/.test(t)){d=new Date(base);d.setDate(d.getDate()+1)}
+  else{const w=WDN.findIndex(x=>new RegExp("\\b"+x+"\\b").test(t));if(w>=0){d=new Date(base);d.setDate(d.getDate()+(w-d.getDay()+7)%7)}}
+  if(!d){const m=t.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*/);if(m)d=new Date(base.getFullYear(),MONN.indexOf(m[2]),+m[1],12)}
+  if(!d){const m=t.match(/\b(\d{1,2})\/(\d{1,2})(?:\/\d{2,4})?\b/);if(m)d=new Date(base.getFullYear(),+m[2]-1,+m[1],12)}
+  if(d&&ymd(d)<ymd(now))o.warn.push("that date has passed");
+  if(d)o.date=d;else o.warn.push("date not found, pick it");
+  const t2=t.replace(/\d{1,2}\/\d{1,2}(\/\d{2,4})?/g," ").replace(/\b\d{1,2}(st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*/g," ").replace(/\b(eco|ssc)\s?\d{3}\b/g," ");
+  const tms=[];
+  for(const m of t2.matchAll(/\b(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?(?!\d)/g)){
+    const h0=+m[1],mi=m[2]?+m[2]:0,ap=m[3];
+    if(h0>23||mi>59)continue;
+    if(!ap&&!m[2]&&(h0<7||h0>20))continue;
+    let h=h0;
+    if(ap){if(ap[0]==="p"&&h<12)h+=12;if(ap[0]==="a"&&h===12)h=0}
+    else if(h>=1&&h<=6)h+=12;
+    tms.push(h*60+mi);
+  }
+  if(o.kind!=="c"){
+    if(tms.length>=2){o.st=tms[0];o.en=tms[1]}
+    else if(tms.length===1)o.warn.push("end time missing, set both times");
+  }
+  return o;
+}
+function fillFromRep(){
+  const src=$("prep").value.trim(),m=$("pm1");
+  if(!src){m.textContent="Paste the rep's message first.";return}
+  const p=parseRep(src);
+  if(p.course)$("pc").value=p.course;
+  if(p.kind)$("pk").value=p.kind;
+  if(p.date)$("pd").value=ymd(p.date);
+  $("pn").value=src.slice(0,200);
+  const setT=(id,mins)=>{const h=Math.floor(mins/60),mi=Math.min(55,Math.round((mins%60)/5)*5);$(id+"h").value=String(h%12||12);$(id+"m").value=p2(mi);$(id+"a").value=h>=12?"PM":"AM"};
+  if(p.st!==undefined){setT("pst",p.st);setT("pen",p.en)}
+  m.textContent=(p.warn.length?"Check: "+p.warn.join("; ")+". ":"")+"Form filled from the update. Check it, then tap Post.";
+}
+document.addEventListener("click",e=>{if(e.target&&e.target.id==="pparse")fillFromRep()});
+
 function showPresent(d){
   document.getElementById("pres")?.remove();
   const cc=COURSES.find(x=>x[0]===d.course);
@@ -317,10 +428,11 @@ const idOf=m=>m.replace(/[^A-Z0-9]/g,"");
 
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{
   document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));
-  ["st","at","mt","dl","po"].forEach(id=>$(id).hidden=id!==b.dataset.t);
+  ["st","at","mt","dl","po","sr"].forEach(id=>$(id).hidden=id!==b.dataset.t);
   b.scrollIntoView({inline:"center",block:"nearest"});
   if(b.dataset.t==="mt")renderMat();
   if(b.dataset.t==="dl")renderDL();
+  if(b.dataset.t==="sr")renderStudy();
   if(b.dataset.t==="po"&&db&&!isPoster)getDoc(D("config/poster")).then(d=>{pin=d.exists()?d.data().pin:null;renderPoster()}).catch(()=>warn("Can’t reach the database."));
 });
 
@@ -412,6 +524,7 @@ function manualAdd(sid){
   };
 }
 const AIM={explain:"Explain this in simple language with a real-life example (a Nigerian one if possible). Then give me a 3-point summary.",hints:"Do not just give me the final answer. Break it into small steps, give me a hint for step 1, and ask me to try it before you show more.",quiz:"Ask me 5 practice questions on this, one at a time, and tell me whether each of my answers is right.",check:"Check my attempt below. Point out any mistakes and explain how to fix them."};
+AIM.deep="Explain this from first principles in plain language, step by step. Then give me 2 practical real-world scenarios with the numbers worked through, and 2 business decision questions (for example pricing, cost, risk or demand) that test whether I can apply the maths. Do not give me the final answers; end with one question for me to try.";
 let aiCtx=null,aiMode="explain";
 function aiPrompt(extra){
   const c=aiCtx;
@@ -427,7 +540,7 @@ function aiPrompt(extra){
 function askAI(ctx,mode){aiCtx=ctx;aiMode=mode;drawAI()}
 function drawAI(){
   const c=aiCtx,keep=$("aix")?$("aix").value:"";
-  const chips=[["explain","Explain simply"],["hints","Step-by-step hints"],["quiz","Quiz me"],["check","Check my answer"]];
+  const chips=[["explain","Explain simply"],["hints","Step-by-step hints"],["deep","Deep + scenarios"],["quiz","Quiz me"],["check","Check my answer"]];
   const tip=c.tip==="file"?"Tip: ChatGPT and Gemini can’t open private Drive files. Open the file, download it, and attach it inside the AI app for the best answers.":c.tip==="pic1"?"Tip: this assignment has pictures. Tap View picture, save it, and attach it inside the AI app.":"";
   openLB(`<div class="card" style="max-width:520px;margin:0 auto"><b>Ask AI about this</b><p class="sub" style="margin:4px 0 10px">${esc(c.course)} · ${esc(c.title)}</p><div style="display:flex;gap:8px;flex-wrap:wrap">${chips.map(([k,l])=>`<button class="b ${aiMode===k?"h":"n"}" style="background:${aiMode===k?"rgba(76,196,137,.2)":"none"};cursor:pointer" data-aim="${k}">${l}</button>`).join("")}</div><textarea id="aix" rows="4" placeholder="${aiMode==="check"?"Paste your attempt here":"Your own question (optional)"}">${esc(keep)}</textarea><button class="btn" id="aigpt" style="margin:8px 0 0;max-width:none">Open ChatGPT</button><button class="btn" id="aigem" style="margin:8px 0 0;max-width:none">Open Gemini</button><p class="sub" style="margin:10px 0 0">Your prompt is copied too. If the chat box is empty, just paste it. AI can make mistakes, so check with your lecturer’s notes and write your own answer.${tip?"<br><br>"+esc(tip):""}</p></div>`);
   $("lbc").querySelectorAll("[data-aim]").forEach(b=>b.onclick=()=>{aiMode=b.dataset.aim;drawAI()});
@@ -553,7 +666,7 @@ function renderPoster(){
   const posted=Object.entries(board).filter(([k])=>{const dd=k.split("_")[1];return dd&&dd>=td0}).sort((a,b)=>a[0].split("_")[1].localeCompare(b[0].split("_")[1])||a[0].localeCompare(b[0]));
   const postedCard=`<div class="card"><b>Posted updates</b>${posted.length?posted.map(([k,v])=>{const[c,dd]=k.split("_"),cc=COURSES.find(x=>x[0].replace(" ","")===c);return `<div class="row" style="margin:8px 0;font-size:14px"><span>${cc?cc[0]:c} · ${dd===td0?"Today":dd===ymd(addDays(1))?"Tomorrow":dd}<br><small>${KL[v.kind]||""}${v.st?" · "+f12(v.st)+" to "+f12(v.en):""}</small></span><span><button class="b h" style="background:none;cursor:pointer" data-ed="${esc(k)}">Edit</button> <button class="b c" style="background:none;cursor:pointer" data-del="${esc(k)}">Delete</button></span></div>`}).join(""):"<p class=sub>Nothing posted yet.</p>"}</div>`;
   el.innerHTML=`<div class="card"><b>Post class status</b>
-<select id="pc">${opts}</select>
+<div style="margin-bottom:10px"><small>Paste a rep update. The form fills in; you check it, then tap Post.</small><textarea id="prep" rows="3" placeholder="e.g. ECO 311 is cancelled tomorrow"></textarea><button class="btn" id="pparse" style="margin:6px 0 0;max-width:none">Fill in from update</button></div><select id="pc">${opts}</select>
 <select id="pk"><option value="h">Class is holding</option><option value="c">Class cancelled</option><option value="m">Class moved</option></select>
 <small>Class date</small><input id="pd" type="date" min="${ymd(new Date())}" value="${pdate>=ymd(new Date())?pdate:ymd(new Date())}">
 <small>Starts</small>${tsel("pst")}
