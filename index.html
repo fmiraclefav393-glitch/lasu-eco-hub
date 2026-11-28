@@ -140,7 +140,7 @@ textarea{width:100%;padding:11px;margin:5px 0;border:1px solid var(--gbrd);borde
 .nofx #fx,.lite #fx{display:none}
 @media(prefers-reduced-motion:reduce){#fx i{animation:none}}
 #fxt{width:100%;margin-top:8px;padding:8px;border-radius:999px;font:inherit;font-size:13px;font-weight:600;color:var(--tx);background:var(--ibg);border:1px solid var(--bd);cursor:pointer}
-</style></head><body>
+</style><script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script></head><body>
 <svg class="deco d1" viewBox="0 0 100 100" aria-hidden="true"><defs><linearGradient id="gs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".6"/><stop offset=".55" stop-color="#cfd8d3" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity=".45"/></linearGradient></defs><path d="M50 5C60 5 66 30 95 38C99 50 99 50 95 62C66 70 60 95 50 95C40 95 34 70 5 62C1 50 1 50 5 38C34 30 40 5 50 5Z" fill="url(#gs)" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/></svg>
 <svg class="deco d2" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 5C60 5 66 30 95 38C99 50 99 50 95 62C66 70 60 95 50 95C40 95 34 70 5 62C1 50 1 50 5 38C34 30 40 5 50 5Z" fill="url(#gs)" stroke="rgba(255,255,255,.55)" stroke-width="1.2"/></svg>
 <div id="splash"><img id="logo" alt=""><h2 id="spn"></h2><p id="spt"></p><div class="bar"><i></i></div></div>
@@ -175,7 +175,9 @@ window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElem
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getFirestore,doc,collection,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,getDocs,deleteField,arrayUnion} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import {firebaseConfig} from "./firebase-config.js";
+import {firebaseConfig} from "./firebase-config.js"
+import {getStorage,ref as sRef,uploadBytes,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";;
 
 const COURSES=[["ECO 301","Intermediate Microeconomics 1"],["ECO 331","Intermediate Macroeconomics 1"],["ECO 305","History of Economic Thought"],["ECO 307","Project Evaluation"],["SSC 301","Innovation in Social Science"],["ECO 311","Mathematics for Economist III"],["ECO 317","Environmental Economics"],["ECO 319","Statistics for Economists II"],["ECO 337","International Trade"],["ECO 303","Applied Monetary Economics"]];
 const $=id=>document.getElementById(id);
@@ -395,6 +397,98 @@ function fillFromRep(){
   m.textContent=(p.warn.length?"Check: "+p.warn.join("; ")+". ":"")+"Form filled from the update. Check it, then tap Post.";
 }
 document.addEventListener("click",e=>{if(e.target&&e.target.id==="pparse")fillFromRep()});
+
+
+/* ===== PDF upload, AI Tutor drawer ===== */
+let stor=null,fnc=null;
+const PDF_WORKER="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+if(window.pdfjsLib)pdfjsLib.GlobalWorkerOptions.workerSrc=PDF_WORKER;
+function capChunks(chunks){let total=0;const out=[];for(const c of chunks){total+=c.text.length;if(total>800000)break;out.push(c)}return out}
+async function extractPdf(file){
+  if(!window.pdfjsLib)throw new Error("The PDF reader didn’t load. Check your internet and try again.");
+  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  const chunks=[];
+  for(let i=1;i<=pdf.numPages;i++){
+    const c=await (await pdf.getPage(i)).getTextContent();
+    const text=c.items.map(x=>x.str).join(" ").replace(/\s+/g," ").trim();
+    if(text)chunks.push({page:i,text:text.slice(0,6000)});
+  }
+  return {pageCount:pdf.numPages,chunks:capChunks(chunks)};
+}
+async function addMaterial(){
+  const code=$("mc").value,cat=$("mk").value,title=$("mti").value.trim(),lec=$("mle").value.trim(),link=$("mli").value.trim(),file=$("mfile")&&$("mfile").files[0],m=$("mmsg");
+  if(!title){m.textContent="Add a title.";return}
+  if(!file&&!link){m.textContent="Upload a PDF or paste a link.";return}
+  if(link&&!safeUrl(link)){m.textContent="The link must start with https://";return}
+  if(file&&file.size>15*1024*1024){m.textContent="That PDF is over 15 MB. Compress it or use a Drive link.";return}
+  const id="m"+Date.now(),item={cat,title,lec,t:Date.now()};
+  try{
+    if(file){
+      m.textContent="Reading the PDF…";
+      const ex=await extractPdf(file);
+      m.textContent="Uploading…";
+      const safe=file.name.replace(/[^\w.\-]+/g,"_").slice(0,80);
+      const sref=sRef(stor,"materials/"+mkey(code)+"/"+id+"-"+safe);
+      await uploadBytes(sref,file,{contentType:"application/pdf"});
+      item.link=await getDownloadURL(sref);item.fileName=file.name;item.pageCount=ex.pageCount;
+      if(ex.chunks.length){
+        await setDoc(D("mat_text/"+id),{course:code,cat,title,chunks:ex.chunks});
+        item.tx=true;
+      }
+    }else item.link=link;
+    await setDoc(D("config/mat_"+mkey(code)),{[id]:item},{merge:true});
+    if(mcache[code])mcache[code][id]=item;
+    $("mti").value="";$("mli").value="";$("mle").value="";if($("mfile"))$("mfile").value="";
+    m.textContent=file&&!item.tx?"Added to "+code+", but no selectable text was found (scanned PDF), so the AI Tutor can’t read it.":"Added to "+code+(item.tx?". The AI Tutor can read it.":".");
+  }catch(e){
+    m.textContent=e.code==="storage/unauthorized"?"Storage rules block the upload. Check Firebase Storage rules.":"Couldn’t add it ("+(e.code||e.message||"error")+").";
+  }
+}
+
+const TUT_MODES=[["explain","Explain"],["deep","Scenarios & business"],["hints","Hints"],["quiz","Quiz me"],["check","Check my answer"]];
+const fmtTutor=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
+function tutErr(e){
+  const c=String(e.code||""),msg=e.message||"Something went wrong.";
+  if(c.includes("resource-exhausted"))return msg;
+  if(c.includes("not-found")&&!/no text/i.test(msg))return "The AI Tutor isn’t set up on the server yet. Ask the admin to deploy the tutor function.";
+  if(c.includes("unavailable")||c.includes("internal")||c.includes("deadline"))return "The tutor is busy or offline. Try again in a minute.";
+  return msg;
+}
+function openTutor(code,matId,item){
+  const tutMsg=()=>$("tout");
+  openLB(`<div class="card" style="max-width:560px;margin:0 auto">
+    <b>AI Tutor</b>
+    <p class="sub" style="margin:4px 0 8px">${esc(code)} · ${esc(item.title)}</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">${TUT_MODES.map(([k,l])=>`<button class="b n" data-tm="${k}" style="cursor:pointer">${l}</button>`).join("")}</div>
+    <textarea id="tq" rows="3" placeholder="Ask about this material, or paste your answer to check it (optional)"></textarea>
+    <button class="btn" id="tgo" style="max-width:none">Ask the tutor</button>
+    <div id="tout" style="margin-top:12px"></div>
+    <button class="btn s" id="tdrop" style="max-width:none;display:none">Drop to Study Room</button>
+    <p class="sub" style="margin-top:10px">AI can make mistakes. Check against your lecturer’s notes.</p>
+  </div>`);
+  let mode="explain",last="";
+  const setMode=k=>{mode=k;document.querySelectorAll("[data-tm]").forEach(b=>b.style.background=b.dataset.tm===k?"rgba(var(--acrgb),.2)":"none")};
+  setMode("explain");
+  document.querySelectorAll("[data-tm]").forEach(b=>b.onclick=()=>setMode(b.dataset.tm));
+  $("tgo").onclick=async()=>{
+    const btn=$("tgo");
+    btn.disabled=true;tutMsg().innerHTML='<p class="sub">Reading the material and thinking…</p>';$("tdrop").style.display="none";
+    try{
+      const res=await httpsCallable(fnc,"askCourseTutor")({course:code,materialId:matId,mode,userQuestion:$("tq").value.trim().slice(0,1000)});
+      const r=res.data;last=r.text||"";
+      tutMsg().innerHTML=`<div style="line-height:1.6">${fmtTutor(last)}</div>${(r.sources||[]).length?`<p class="sub" style="margin-top:10px"><b>Sources:</b> ${r.sources.map(x=>esc(x)).join(" · ")}</p>`:""}`;
+      $("tdrop").style.display="";
+    }catch(e){tutMsg().innerHTML=`<p class="sub">${esc(tutErr(e))}</p>`}
+    btn.disabled=false;
+  };
+  $("tdrop").onclick=async()=>{
+    const b=$("tdrop");
+    try{
+      await setDoc(D("studyRooms/"+ymd(new Date())),{items:arrayUnion({id:Date.now().toString(36),k:"n",text:("[AI Tutor · "+item.title+"]\n"+last).slice(0,600),by:gname()||"AI Tutor",t:Date.now()})},{merge:true});
+      b.textContent="Dropped in ✓";
+    }catch(e){b.textContent="Not saved. Check the Study room rule."}
+  };
+}
 
 function showPresent(d){
   document.getElementById("pres")?.remove();
@@ -628,7 +722,7 @@ async function renderMat(){
   if(!items.length)html+=`<div class="card"><p class="sub" style="margin:0">Nothing added yet. Check back soon.</p></div>`;
   CATS.forEach(cat=>{
     const g=items.filter(x=>x.cat===cat);if(!g.length)return;
-    html+=`<p style="margin:14px 0 4px"><b>${cat}</b></p>`+g.map(x=>`<div class="card"><div class="row"><div><b>${esc(x.title)}</b>${x.lec?`<br><small>${esc(x.lec)}</small>`:""}</div><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><a class="b h" style="text-decoration:none" href="${esc(x.link)}" target="_blank" rel="noopener">Open</a><button class="b h" style="background:none;cursor:pointer" data-aim2="${esc(x.id)}">Ask AI</button>${isPoster?` <button class="b c" style="background:none;cursor:pointer" data-md="${esc(x.id)}">Delete</button>`:""}</span></div></div>`).join("");
+    html+=`<p style="margin:14px 0 4px"><b>${cat}</b></p>`+g.map(x=>`<div class="card"><div class="row"><div><b>${esc(x.title)}</b>${x.lec?`<br><small>${esc(x.lec)}</small>`:""}</div><span style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><a class="b h" style="text-decoration:none" href="${esc(x.link)}" target="_blank" rel="noopener">Open</a>${x.tx?`<button class="b h" style="background:none;cursor:pointer" data-tut="${esc(x.id)}">Ask AI tutor</button>`:`<button class="b h" style="background:none;cursor:pointer" data-aim2="${esc(x.id)}">Ask AI</button>`}${isPoster?` <button class="b c" style="background:none;cursor:pointer" data-md="${esc(x.id)}">Delete</button>`:""}</span></div></div>`).join("");
   });
   html+=`<button class="btn s" id="mr" style="margin-top:12px">Refresh</button>`;
   el.innerHTML=html;
@@ -638,6 +732,7 @@ async function renderMat(){
     const x=items.find(i=>i.id===b.dataset.aim2);if(!x)return;const cc=COURSES.find(c=>c[0]===mview);
     askAI({course:mview,courseTitle:cc?cc[1]:"",kind:x.cat,title:x.title,lec:x.lec||"",text:"",note:"",tip:"file"},/past/i.test(x.cat)?"hints":"explain");
   });
+  el.querySelectorAll("[data-tut]").forEach(b=>b.onclick=()=>{const x=items.find(i=>i.id===b.dataset.tut);if(x)openTutor(mview,x.id,x)});
   el.querySelectorAll("[data-md]").forEach(b=>b.onclick=async()=>{
     try{await updateDoc(D("config/mat_"+mkey(mview)),{[b.dataset.md]:deleteField()});delete mcache[mview][b.dataset.md]}catch(e){}
     renderMat();
@@ -680,7 +775,7 @@ ${postedCard}
 <select id="mk">${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
 <input id="mti" placeholder="Title (e.g. 2023/2024 exam questions)">
 <input id="mle" placeholder="Lecturer or topic (optional)">
-<input id="mli" placeholder="Paste the Google Drive link" inputmode="url" autocapitalize="off">
+<small>Upload a PDF (its text is read so the AI Tutor can use it), or paste a Google Drive link.</small><input type="file" id="mfile" accept="application/pdf"><input id="mli" placeholder="…or paste the Google Drive link" inputmode="url" autocapitalize="off">
 <button class="btn" id="ma">Add material</button><div class="msg" id="mmsg"></div>
 <p class="sub">In Google Drive: open the file or folder, tap Share, set General access to “Anyone with the link”, then copy the link.</p></div>
 <div class="card"><b>Add deadline or test</b>
@@ -748,17 +843,7 @@ ${newCode?`<p class="sub" style="text-align:center">Show this code in class</p><
       m.textContent="Saved.";renderStatus();
     }catch(e){m.textContent="Couldn’t save. Check your connection."}
   };
-  $("ma").onclick=async()=>{
-    const code=$("mc").value,cat=$("mk").value,title=$("mti").value.trim(),lec=$("mle").value.trim(),link=$("mli").value.trim(),m=$("mmsg");
-    if(!title||!link){m.textContent="Add a title and a link.";return}
-    if(!safeUrl(link)){m.textContent="The link must start with https://";return}
-    const id="m"+Date.now(),item={cat,title,lec,link,t:Date.now()};
-    try{
-      await setDoc(D("config/mat_"+mkey(code)),{[id]:item},{merge:true});
-      if(mcache[code])mcache[code][id]=item;
-      $("mti").value="";$("mli").value="";m.textContent="Added to "+code+".";
-    }catch(e){m.textContent="Couldn’t add it. Check your connection."}
-  };
+  $("ma").onclick=addMaterial;
   $("ps").onclick=async()=>{
     const t=Date.now();
     const st=tget("pst"),en=tget("pen"),kd=$("pk").value;
@@ -891,7 +976,7 @@ async function startDL(){await loadDL();renderStatus()}
 renderStatus();
 try{
   if(String(firebaseConfig.apiKey).includes("PASTE"))throw new Error("config");
-  fbApp=initializeApp(firebaseConfig);db=getFirestore(fbApp);
+  fbApp=initializeApp(firebaseConfig);db=getFirestore(fbApp);stor=getStorage(fbApp);fnc=getFunctions(fbApp,"us-central1");
   startDL();
   onSnapshot(D("config/board"),d=>{board=d.exists()?d.data():{};boardReady=true;if($("warn").textContent.startsWith("Still"))$("warn").hidden=true;renderStatus();hideSplash()},err);
 }catch(e){warn("Setup not finished: the Firebase details in firebase-config.js are missing.");hideSplash()}
