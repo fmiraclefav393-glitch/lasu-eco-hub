@@ -542,7 +542,10 @@ async function askTutorFree(code,matId,mode,q){
     headers:{"Content-Type":"application/json","x-goog-api-key":TUTOR_KEY},
     body:JSON.stringify({systemInstruction:{parts:[{text:TUT_SYSTEM}]},contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{temperature:0.4,maxOutputTokens:4096}})
   });
-  if(!resp.ok)throw {code:"busy",message:resp.status===429?"The tutor’s free limit is used up for now. Try again later.":"The tutor is busy. Try again in a minute."};
+  if(!resp.ok){
+    let detail="";try{const ej=await resp.json();detail=(ej.error&&ej.error.message)||""}catch(x){}
+    throw {code:"busy",message:resp.status===429?"The tutor’s free limit is used up for now. Try again later.":"Tutor error "+resp.status+": "+(detail||"no details from Google").slice(0,220)};
+  }
   const j=await resp.json();
   const text=((j.candidates&&j.candidates[0]&&j.candidates[0].content.parts)||[]).map(x=>x.text||"").join("").trim();
   if(!text)throw {code:"empty",message:"No answer came back. Try rephrasing."};
