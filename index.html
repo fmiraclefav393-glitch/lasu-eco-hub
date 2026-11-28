@@ -418,7 +418,8 @@ async function extractPdf(file){
 async function addMaterial(){
   const code=$("mc").value,cat=$("mk").value,title=$("mti").value.trim(),lec=$("mle").value.trim(),link=$("mli").value.trim(),file=$("mfile")&&$("mfile").files[0],m=$("mmsg");
   if(!title){m.textContent="Add a title.";return}
-  if(!file&&!link){m.textContent="Upload a PDF or paste a link.";return}
+  if(!file&&!link){m.textContent="Paste a Google Drive link.";return}
+  if(file&&!link){m.textContent="Also paste the Google Drive link so students can open the file.";return}
   if(link&&!safeUrl(link)){m.textContent="The link must start with https://";return}
   if(file&&file.size>15*1024*1024){m.textContent="That PDF is over 15 MB. Compress it or use a Drive link.";return}
   const id="m"+Date.now(),item={cat,title,lec,t:Date.now()};
@@ -426,17 +427,7 @@ async function addMaterial(){
     if(file){
       m.textContent="Reading the PDF…";
       const ex=await extractPdf(file);
-      m.textContent="Uploading…";
-      const safe=file.name.replace(/[^\w.\-]+/g,"_").slice(0,80);
-      const sref=sRef(stor,"materials/"+mkey(code)+"/"+id+"-"+safe);
-      await new Promise((resolve,reject)=>{
-        const task=uploadBytesResumable(sref,file,{contentType:"application/pdf"});
-        const timer=setTimeout(()=>{task.cancel();reject({code:"app/timeout"})},180000);
-        task.on("state_changed",snap=>{m.textContent="Uploading… "+Math.round(100*snap.bytesTransferred/snap.totalBytes)+"%"},
-          err=>{clearTimeout(timer);reject(err)},
-          ()=>{clearTimeout(timer);resolve()});
-      });
-      item.link=await getDownloadURL(sref);item.fileName=file.name;item.pageCount=ex.pageCount;
+      item.link=link;item.fileName=file.name;item.pageCount=ex.pageCount;
       if(ex.chunks.length){
         await setDoc(D("mat_text/"+id),{course:code,cat,title,chunks:ex.chunks});
         item.tx=true;
@@ -781,7 +772,7 @@ ${postedCard}
 <select id="mk">${CATS.map(c=>`<option>${c}</option>`).join("")}</select>
 <input id="mti" placeholder="Title (e.g. 2023/2024 exam questions)">
 <input id="mle" placeholder="Lecturer or topic (optional)">
-<small>Upload a PDF (its text is read so the AI Tutor can use it), or paste a Google Drive link.</small><input type="file" id="mfile" accept="application/pdf"><input id="mli" placeholder="…or paste the Google Drive link" inputmode="url" autocapitalize="off">
+<small>Choose the PDF to read its text for the AI Tutor (the file is not uploaded). Then paste its Google Drive link so students can open it.</small><input type="file" id="mfile" accept="application/pdf"><input id="mli" placeholder="…or paste the Google Drive link" inputmode="url" autocapitalize="off">
 <button class="btn" id="ma">Add material</button><div class="msg" id="mmsg"></div>
 <p class="sub">In Google Drive: open the file or folder, tap Share, set General access to “Anyone with the link”, then copy the link.</p></div>
 <div class="card"><b>Add deadline or test</b>
