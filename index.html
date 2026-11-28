@@ -489,7 +489,7 @@ function openTutor(code,matId,item){
 
 
 /* ===== Free AI Tutor (no Cloud Functions, no Storage) ===== */
-const TUTOR_KEY="PASTE_YOUR_GEMINI_KEY_HERE";
+let TUTOR_KEY="";
 const TUTOR_DAILY_CAP=40;
 const TUT_STOP=new Set(["that","this","with","from","have","will","what","when","where","which","their","there","about","into","your","they","them","then","than","also","these","those","been","being","would","could","should","because","while","more","some","each"]);
 const TUT_TASKS={
@@ -1037,6 +1037,7 @@ renderStatus();
 try{
   if(String(firebaseConfig.apiKey).includes("PASTE"))throw new Error("config");
   fbApp=initializeApp(firebaseConfig);db=getFirestore(fbApp);stor=getStorage(fbApp);fnc=getFunctions(fbApp,"us-central1");
+    getDoc(D("config/ai")).then(d=>{TUTOR_KEY=(d.data()||{}).gemini||""}).catch(()=>{});
   startDL();
   onSnapshot(D("config/board"),d=>{board=d.exists()?d.data():{};boardReady=true;if($("warn").textContent.startsWith("Still"))$("warn").hidden=true;renderStatus();hideSplash()},err);
 }catch(e){warn("Setup not finished: the Firebase details in firebase-config.js are missing.");hideSplash()}
