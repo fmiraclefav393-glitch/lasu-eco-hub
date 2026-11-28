@@ -176,7 +176,7 @@ window.__t=setTimeout(function(){if(window.__ready)return;var p=document.getElem
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import {getFirestore,doc,collection,getDoc,setDoc,updateDoc,deleteDoc,onSnapshot,query,where,getDocs,deleteField,arrayUnion} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 import {firebaseConfig} from "./firebase-config.js"
-import {getStorage,ref as sRef,uploadBytes,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+import {getStorage,ref as sRef,uploadBytesResumable,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 import {getFunctions,httpsCallable} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-functions.js";;
 
 const COURSES=[["ECO 301","Intermediate Microeconomics 1"],["ECO 331","Intermediate Macroeconomics 1"],["ECO 305","History of Economic Thought"],["ECO 307","Project Evaluation"],["SSC 301","Innovation in Social Science"],["ECO 311","Mathematics for Economist III"],["ECO 317","Environmental Economics"],["ECO 319","Statistics for Economists II"],["ECO 337","International Trade"],["ECO 303","Applied Monetary Economics"]];
@@ -429,7 +429,13 @@ async function addMaterial(){
       m.textContent="Uploading…";
       const safe=file.name.replace(/[^\w.\-]+/g,"_").slice(0,80);
       const sref=sRef(stor,"materials/"+mkey(code)+"/"+id+"-"+safe);
-      await uploadBytes(sref,file,{contentType:"application/pdf"});
+      await new Promise((resolve,reject)=>{
+        const task=uploadBytesResumable(sref,file,{contentType:"application/pdf"});
+        const timer=setTimeout(()=>{task.cancel();reject({code:"app/timeout"})},180000);
+        task.on("state_changed",snap=>{m.textContent="Uploading… "+Math.round(100*snap.bytesTransferred/snap.totalBytes)+"%"},
+          err=>{clearTimeout(timer);reject(err)},
+          ()=>{clearTimeout(timer);resolve()});
+      });
       item.link=await getDownloadURL(sref);item.fileName=file.name;item.pageCount=ex.pageCount;
       if(ex.chunks.length){
         await setDoc(D("mat_text/"+id),{course:code,cat,title,chunks:ex.chunks});
@@ -441,7 +447,7 @@ async function addMaterial(){
     $("mti").value="";$("mli").value="";$("mle").value="";if($("mfile"))$("mfile").value="";
     m.textContent=file&&!item.tx?"Added to "+code+", but no selectable text was found (scanned PDF), so the AI Tutor can’t read it.":"Added to "+code+(item.tx?". The AI Tutor can read it.":".");
   }catch(e){
-    m.textContent=e.code==="storage/unauthorized"?"Storage rules block the upload. Check Firebase Storage rules.":"Couldn’t add it ("+(e.code||e.message||"error")+").";
+    m.textContent=e.code==="app/timeout"?"The upload timed out. Check your connection, or try a smaller PDF.":e.code==="storage/unauthorized"?"Storage rules block the upload. Check Firebase Storage rules.":"Couldn’t add it ("+(e.code||e.message||"error")+").";
   }
 }
 
