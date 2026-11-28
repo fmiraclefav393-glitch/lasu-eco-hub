@@ -537,7 +537,7 @@ async function askTutorFree(code,matId,mode,q){
   for(const r of scored){if(refs.length>=5||len>8000)break;refs.push(r);len+=r.text.length}
   const refText=refs.length?refs.map(r=>`- [${r.cat} | ${r.title} | p.${r.page}]: ${r.text}`).join("\n"):"(none found)";
   const prompt=`COURSE: ${code}\n\nPRIMARY MATERIAL (${P.cat} - ${P.title}):\n${primaryText}\n\nRELATED REFERENCES FROM THIS COURSE:\n${refText}\n\nTASK: ${TUT_TASKS[mode]||TUT_TASKS.explain}`+(q?`\n\nSTUDENT'S MESSAGE:\n${q}`:"");
-  const resp=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",{
+  const resp=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",{
     method:"POST",
     headers:{"Content-Type":"application/json","x-goog-api-key":TUTOR_KEY},
     body:JSON.stringify({systemInstruction:{parts:[{text:TUT_SYSTEM}]},contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{temperature:0.4,maxOutputTokens:4096}})
