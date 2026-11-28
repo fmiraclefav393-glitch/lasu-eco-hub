@@ -446,6 +446,7 @@ const TUT_MODES=[["explain","Explain"],["deep","Scenarios & business"],["hints",
 const fmtTutor=t=>esc(t).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>").replace(/\n/g,"<br>");
 function tutErr(e){
   const c=String(e.code||""),msg=e.message||"Something went wrong.";
+  if(["setup","cap","notext","busy","empty"].includes(c))return msg;
   if(c.includes("resource-exhausted"))return msg;
   if(c.includes("not-found")&&!/no text/i.test(msg))return "The AI Tutor isn’t set up on the server yet. Ask the admin to deploy the tutor function.";
   if(c.includes("unavailable")||c.includes("internal")||c.includes("deadline"))return "The tutor is busy or offline. Try again in a minute.";
@@ -471,8 +472,7 @@ function openTutor(code,matId,item){
     const btn=$("tgo");
     btn.disabled=true;tutMsg().innerHTML='<p class="sub">Reading the material and thinking…</p>';$("tdrop").style.display="none";
     try{
-      const res=await httpsCallable(fnc,"askCourseTutor")({course:code,materialId:matId,mode,userQuestion:$("tq").value.trim().slice(0,1000)});
-      const r=res.data;last=r.text||"";
+      const r=await askTutorFree(code,matId,mode,$("tq").value.trim().slice(0,1000));last=r.text||"";
       tutMsg().innerHTML=`<div style="line-height:1.6">${fmtTutor(last)}</div>${(r.sources||[]).length?`<p class="sub" style="margin-top:10px"><b>Sources:</b> ${r.sources.map(x=>esc(x)).join(" · ")}</p>`:""}`;
       $("tdrop").style.display="";
     }catch(e){tutMsg().innerHTML=`<p class="sub">${esc(tutErr(e))}</p>`}
@@ -487,6 +487,69 @@ function openTutor(code,matId,item){
   };
 }
 
+
+/* ===== Free AI Tutor (no Cloud Functions, no Storage) ===== */
+const TUTOR_KEY="PASTE_YOUR_GEMINI_KEY_HERE";
+const TUTOR_DAILY_CAP=40;
+const TUT_STOP=new Set(["that","this","with","from","have","will","what","when","where","which","their","there","about","into","your","they","them","then","than","also","these","those","been","being","would","could","should","because","while","more","some","each"]);
+const TUT_TASKS={
+  explain:"Explain the PRIMARY MATERIAL step by step from first principles, in plain language. Work through the maths.",
+  deep:"Explain the PRIMARY MATERIAL from first principles. Then give 2 practical real-world scenario problems with step-by-step maths solutions, and 2 business decision-making problems that apply the concept.",
+  hints:"Do not give the final answer. Give a hint for step 1 only, and ask the student to try it.",
+  quiz:"Ask the student 5 practice questions from the PRIMARY MATERIAL, one at a time. Wait for their answer before asking the next. Say whether each answer is right and why.",
+  check:"The student has written an attempt in their message. Check it. Point out mistakes and explain how to fix them. Do not write the full corrected answer."
+};
+const TUT_SYSTEM="You are an expert 300-level Economics tutor at LASU Ojo, Nigeria. Explain concepts from first principles so any student can master the maths. Cite the material you rely on by title and page number, like (Lecture 3, p.4). Use the RELATED REFERENCES only where they genuinely help. If the material does not contain the answer, say so instead of guessing.";
+const tutTokens=t=>(t.toLowerCase().match(/[a-z][a-z-]{3,}/g)||[]).filter(w=>!TUT_STOP.has(w));
+function tutUsedToday(){
+  const k="tutor_"+ymd(new Date());
+  try{return +localStorage.getItem(k)||0}catch(e){return 0}
+}
+function tutBump(){
+  const k="tutor_"+ymd(new Date());
+  try{localStorage.setItem(k,String(tutUsedToday()+1))}catch(e){}
+}
+async function askTutorFree(code,matId,mode,q){
+  if(!TUTOR_KEY||TUTOR_KEY.includes("PASTE"))throw {code:"setup",message:"The AI Tutor isn’t set up yet. Ask the admin to add the key."};
+  if(tutUsedToday()>=TUTOR_DAILY_CAP)throw {code:"cap",message:"You’ve used today’s tutor answers. Try again tomorrow."};
+  const pSnap=await getDoc(D("mat_text/"+matId));
+  if(!pSnap.exists())throw {code:"notext",message:"This material has no text. Ask the rep to re-upload the PDF."};
+  const P=pSnap.data();
+  const primaryText=P.chunks.map(c=>`[p.${c.page}] ${c.text}`).join("\n").slice(0,60000);
+  const weights=new Map();
+  const add=(words,w)=>words.forEach(t=>weights.set(t,(weights.get(t)||0)+w));
+  add(tutTokens(P.title),5);add(tutTokens(q),5);
+  add(tutTokens(P.chunks.map(c=>c.text).join(" ").slice(0,20000)),1);
+  const topTerms=[...weights.entries()].sort((a,b)=>b[1]-a[1]).slice(0,25).map(x=>x[0]);
+  const others=await getDocs(query(collection(db,"mat_text"),where("course","==",code),limit(40)));
+  const scored=[];
+  others.forEach(doc=>{
+    if(doc.id===matId)return;
+    const O=doc.data();
+    (O.chunks||[]).forEach(c=>{
+      const low=c.text.toLowerCase();
+      let score=0;for(const t of topTerms)if(low.includes(t))score++;
+      if(score>=2)scored.push({score,title:O.title,cat:O.cat,page:c.page,text:c.text.slice(0,1200)});
+    });
+  });
+  scored.sort((a,b)=>b.score-a.score);
+  const refs=[];let len=0;
+  for(const r of scored){if(refs.length>=5||len>8000)break;refs.push(r);len+=r.text.length}
+  const refText=refs.length?refs.map(r=>`- [${r.cat} | ${r.title} | p.${r.page}]: ${r.text}`).join("\n"):"(none found)";
+  const prompt=`COURSE: ${code}\n\nPRIMARY MATERIAL (${P.cat} - ${P.title}):\n${primaryText}\n\nRELATED REFERENCES FROM THIS COURSE:\n${refText}\n\nTASK: ${TUT_TASKS[mode]||TUT_TASKS.explain}`+(q?`\n\nSTUDENT'S MESSAGE:\n${q}`:"");
+  const resp=await fetch("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",{
+    method:"POST",
+    headers:{"Content-Type":"application/json","x-goog-api-key":TUTOR_KEY},
+    body:JSON.stringify({systemInstruction:{parts:[{text:TUT_SYSTEM}]},contents:[{role:"user",parts:[{text:prompt}]}],generationConfig:{temperature:0.4,maxOutputTokens:4096}})
+  });
+  if(!resp.ok)throw {code:"busy",message:resp.status===429?"The tutor’s free limit is used up for now. Try again later.":"The tutor is busy. Try again in a minute."};
+  const j=await resp.json();
+  const text=((j.candidates&&j.candidates[0]&&j.candidates[0].content.parts)||[]).map(x=>x.text||"").join("").trim();
+  if(!text)throw {code:"empty",message:"No answer came back. Try rephrasing."};
+  tutBump();
+  const sources=[`${P.title} (this material)`,...refs.map(r=>`${r.title}, p.${r.page}`)];
+  return {text,sources:[...new Set(sources)]};
+}
 function showPresent(d){
   document.getElementById("pres")?.remove();
   const cc=COURSES.find(x=>x[0]===d.course);
